@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Скопировать текст</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 16px; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    textarea { width: 100%; height: 40vh; padding: 12px; font-size: 16px; }
+    button { width: 100%; padding: 12px; font-size: 16px; border-radius: 10px; border: none; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Скопируйте и вставьте</h1>
+  <textarea id="txt" readonly></textarea>
+  <button id="copyBtn">📋 Скопировать</button>
+  <p id="msg" style="opacity:.8"></p>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const t = params.get("t") || "";
+    const text = decodeURIComponent(t);
+    const ta = document.getElementById("txt");
+    const msg = document.getElementById("msg");
+    ta.value = text;
+    document.getElementById("copyBtn").onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        msg.textContent = "Скопировано. Вернитесь в чат и вставьте.";
+      } catch(e) {
+        ta.select(); document.execCommand("copy");
+        msg.textContent = "Скопировано (fallback).";
+      }
+    };
+  </script>
+</body>
+</html>
