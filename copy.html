@@ -21,10 +21,7 @@
       font-weight:600; font-size:16px;
       background:var(--tg-theme-button-color,#2ea6ff); color:var(--tg-theme-button-text-color,#fff)}
     .hide{display:none}
-    /* полноэкранная “клик-зона” для iOS: любой тап = копия+закрытие */
-    .tapzone{
-      position:fixed; inset:0; z-index:1000; background:transparent;
-    }
+    .tapzone{position:fixed; inset:0; z-index:1000; background:transparent;}
   </style>
 </head>
 <body>
@@ -67,16 +64,12 @@
       $status.textContent = "Скопировано ✓";
       closeSoon();
     }catch(err){
-      // покажем видимую кнопку как запасной вариант
-      console.warn("copy failed:", err);
       $status.textContent = "Нажмите, чтобы скопировать";
       $btn.classList.remove("hide");
-      // и включим полноэкранную зону — ЛЮБОЙ тап сработает
       $zone.classList.remove("hide");
     }
   }
 
-  // Любой первый тап по экрану => копировать и закрыть (для iOS)
   ["pointerdown","touchstart","click"].forEach(ev=>{
     $zone.addEventListener(ev, async (e)=>{
       e.preventDefault(); e.stopPropagation();
@@ -92,7 +85,6 @@
   });
 
   try{ tg?.ready(); }catch(_){}
-  // Попытка автокопии (Android/desktop) — на iOS упадёт и включит “тап-зону”
   copyAndExit();
 })();
 </script>
