@@ -1,92 +1,47 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>Копирование…</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root { color-scheme: light dark; }
-    html,body{height:100%}
-    body{
-      margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: var(--tg-theme-bg-color,#111);
-      color: var(--tg-theme-text-color,#fff);
-      display:grid; place-items:center;
-    }
-    .card{padding:18px 16px; border-radius:16px; background:rgba(255,255,255,.06);
-      width:min(92vw,720px); text-align:center; backdrop-filter:blur(6px)}
-    .t{opacity:.85; font-size:14px}
-    .btn{margin-top:12px; padding:14px 16px; width:100%; border:0; border-radius:12px;
-      font-weight:600; font-size:16px;
-      background:var(--tg-theme-button-color,#2ea6ff); color:var(--tg-theme-button-text-color,#fff)}
-    .hide{display:none}
-    .tapzone{position:fixed; inset:0; z-index:1000; background:transparent;}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Copy</title>
+<style>
+  html,body{margin:0;padding:0;background:#0f1117;color:#e6e6e6;font:16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Inter,system-ui}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{max-width:720px;width:92%;background:#131623;border:1px solid #23283d;border-radius:14px;padding:18px}
+  .txt{white-space:pre-wrap;word-break:break-word;background:#0b0e19;border:1px solid #20263a;border-radius:10px;padding:14px}
+  .btn{margin-top:14px;width:100%;padding:14px 16px;border:0;border-radius:10px;background:#3a5cfb;color:#fff;font-weight:600}
+</style>
 </head>
 <body>
+<div class="wrap">
   <div class="card">
-    <div id="status" class="t">Копируем…</div>
-    <button id="copyBtn" class="btn hide">📋 Скопировать</button>
+    <div id="text" class="txt"></div>
+    <button id="copy" class="btn">📋 Скопировать</button>
   </div>
-  <div id="tapzone" class="tapzone hide" aria-label="tap-to-copy"></div>
+</div>
 
 <script>
-(function () {
+  // Telegram WebApp API
   const tg = window.Telegram?.WebApp;
-  const qs = new URLSearchParams(location.search);
-  const text = qs.get("t") ? decodeURIComponent(qs.get("t")) : "";
+  const params = new URLSearchParams(location.search);
+  const t = params.get('t') || '';
+  const box = document.getElementById('text');
+  const btn = document.getElementById('copy');
+  box.textContent = t;
 
-  const $status = document.getElementById("status");
-  const $btn    = document.getElementById("copyBtn");
-  const $zone   = document.getElementById("tapzone");
-
-  function toast(msg){ try{ tg?.showToast?.({text: msg}); }catch(e){} }
-  function haptic(){ try{ tg?.HapticFeedback?.impactOccurred?.("light"); }catch(e){} }
-  function closeSoon(ms=120){ setTimeout(()=>{ try{ tg?.close(); }catch(_){ window.close(); } }, ms); }
-
-  async function writeClipboard(text){
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-    } else {
-      const ta = document.createElement("textarea");
-      ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
-      document.body.appendChild(ta); ta.focus(); ta.select();
-      document.execCommand("copy"); ta.remove();
-    }
-  }
-
-  async function copyAndExit(){
-    if (!text){ $status.textContent="Нет текста"; toast("Нет текста"); return closeSoon(250); }
+  async function doCopyAndClose(){
     try{
-      await writeClipboard(text);
-      haptic(); toast("Скопировано");
-      $status.textContent = "Скопировано ✓";
-      closeSoon();
-    }catch(err){
-      $status.textContent = "Нажмите, чтобы скопировать";
-      $btn.classList.remove("hide");
-      $zone.classList.remove("hide");
+      await navigator.clipboard.writeText(t);
+      if (tg){ tg.HapticFeedback?.impactOccurred('light'); tg.close(); }
+      else { alert('Скопировано'); window.close(); }
+    }catch(e){
+      alert('Не удалось скопировать: '+e);
     }
   }
+  btn.addEventListener('click', doCopyAndClose);
 
-  ["pointerdown","touchstart","click"].forEach(ev=>{
-    $zone.addEventListener(ev, async (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      $zone.classList.add("hide");
-      try{ await writeClipboard(text); haptic(); toast("Скопировано"); }catch(_){}
-      closeSoon();
-    }, { once:true, passive:false });
-  });
-
-  $btn.addEventListener("click", async ()=>{
-    try{ await writeClipboard(text); haptic(); toast("Скопировано"); }catch(_){}
-    closeSoon();
-  });
-
-  try{ tg?.ready(); }catch(_){}
-  copyAndExit();
-})();
+  // авто-фокус на кнопку (для удобства)
+  setTimeout(()=>btn.focus(), 50);
 </script>
 </body>
 </html>
