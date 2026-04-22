@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Разнос состава</title>
+  <style>
+    :root {
+      --bg: #09070c;
+      --panel: rgba(18, 15, 28, 0.92);
+      --panel-2: rgba(29, 24, 43, 0.96);
+      --line: rgba(255,255,255,0.08);
+      --text: #f5f3fb;
+      --muted: #b8afca;
+      --accent: #ff4fd8;
+      --gold: #f2cf77;
+      --good: #42d392;
+      --warn: #ffb84d;
+      --danger: #ff6b7d;
+      --tile-shadow: 0 10px 20px rgba(0,0,0,.35);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; background: radial-gradient(circle at top, #231630 0%, #0c0a12 55%, #060509 100%); color: var(--text); }
+    body { overflow: hidden; }
+
+    button { font: inherit; color: inherit; }
+
+    .app {
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: calc(10px + var(--safe-top)) 12px calc(12px + var(--safe-bottom));
+      max-width: 540px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .topbar, .panel, .footer-actions, .overlay-card, .goal-chip, .level-chip {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 14px;
+      background: linear-gradient(180deg, rgba(28,22,41,.96), rgba(16,13,24,.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      min-width: 72px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      text-align: center;
+    }
+
+    .badge-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .badge-value {
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(21,17,32,.95), rgba(13,11,20,.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    }
+
+    .goals-wrap {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+    }
+
+    .goal-chip {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-height: 62px;
+    }
+
+    .goal-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+      box-shadow: var(--tile-shadow);
+      flex: none;
+    }
+
+    .goal-title { font-size: 13px; font-weight: 700; line-height: 1.15; }
+    .goal-progress { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .goal-done { outline: 1px solid rgba(66, 211, 146, .55); background: rgba(66, 211, 146, .08); }
+
+    .board-shell {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .boss-bar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: linear-gradient(180deg, rgba(54,32,14,.82), rgba(29,18,10,.9));
+      border: 1px solid rgba(242, 207, 119, .18);
+      border-radius: 16px;
+    }
+
+    .boss-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f2cf77, #8e6c1c);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: #2e1f07;
+      box-shadow: var(--tile-shadow);
+      flex: none;
+    }
+
+    .boss-content { min-width: 0; flex: 1; }
+    .boss-name { font-weight: 800; font-size: 13px; }
+    .boss-desc { font-size: 12px; color: #eadab2; margin-top: 3px; }
+    .boss-timer {
+      margin-top: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .boss-timer-fill {
+      height: 100%;
+      width: 60%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f2cf77, #ff6b7d);
+      transition: width .25s ease;
+    }
+
+    .board-wrap {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .board {
+      width: 100%;
+      max-width: 100%;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 22px;
+      padding: 8px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 14px 30px rgba(0,0,0,.35);
+      align-content: start;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .cell {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.04);
+      overflow: hidden;
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+
+    .cell.selected {
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.55), 0 14px 24px rgba(0,0,0,.32);
+    }
+
+    .cell.hint {
+      animation: pulseHint .9s ease-in-out 3;
+    }
+
+    @keyframes pulseHint {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+      50% { box-shadow: 0 0 0 2px rgba(242, 207, 119, .9); }
+    }
+
+    .tile, .blocker {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px 4px;
+      box-shadow: var(--tile-shadow);
+    }
+
+    .tile {
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.12);
+      text-shadow: 0 1px 1px rgba(0,0,0,.3);
+    }
+
+    .tile-short, .blocker-short {
+      font-size: clamp(12px, 4vw, 20px);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .tile-name, .blocker-name {
+      margin-top: 4px;
+      font-size: clamp(7px, 2vw, 10px);
+      line-height: 1.1;
+      font-weight: 800;
+      opacity: .9;
+    }
+
+    .tile.special-row::after,
+    .tile.special-col::after,
+    .tile.special-bomb::after,
+    .tile.special-blacklist::after {
+      content: attr(data-special-label);
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 9px;
+      font-weight: 900;
+      color: #fff;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.24);
+      padding: 0 4px;
+    }
+
+    .overlay-web {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.14) 0 10%, transparent 12%),
+        repeating-linear-gradient(0deg, transparent 0 8px, rgba(255,255,255,.09) 8px 9px, transparent 9px 17px),
+        repeating-linear-gradient(90deg, transparent 0 8px, rgba(255,255,255,.09) 8px 9px, transparent 9px 17px);
+      mix-blend-mode: screen;
+      opacity: .8;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
+    }
+
+    .tile.locked::before {
+      content: "⛔";
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      font-size: 12px;
+    }
+
+    .blocker.emil {
+      background: linear-gradient(145deg, #4a556d, #202737);
+      border: 1px solid rgba(201,214,255,.14);
+    }
+    .blocker.report {
+      background: linear-gradient(145deg, #6d5d74, #382f45);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .effect-badge {
+      position: absolute;
+      inset: auto 8px 8px auto;
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 900;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+
+    .footer-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(20,16,31,.94), rgba(14,11,21,.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 8px;
+    }
+
+    .action-btn, .primary-btn, .secondary-btn, .level-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      min-height: 50px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+    }
+
+    .action-btn:active, .primary-btn:active, .secondary-btn:active, .level-btn:active {
+      transform: scale(.98);
+    }
+
+    .action-btn strong { display: block; font-size: 14px; }
+    .action-btn span { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #ff56d0, #8f4fff);
+      box-shadow: 0 10px 26px rgba(154, 81, 255, .3);
+    }
+
+    .secondary-btn {
+      background: rgba(255,255,255,.07);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 14px calc(20px + var(--safe-bottom));
+      background: rgba(4,4,8,.72);
+      z-index: 20;
+    }
+
+    .overlay.active { display: flex; }
+
+    .overlay-card {
+      width: min(100%, 480px);
+      max-height: 100%;
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(25,20,38,.98), rgba(11,9,16,.98));
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
+    }
+
+    .hero-title {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.02;
+      margin: 0;
+    }
+
+    .hero-sub {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    .overlay-actions {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .pill-list {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.07);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .levels-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .level-chip {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 12px 10px;
+      min-height: 82px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+    }
+
+    .level-chip small { color: var(--muted); }
+    .level-chip.locked { opacity: .45; }
+    .level-chip.unlocked { box-shadow: 0 8px 20px rgba(0,0,0,.22); }
+    .stars { letter-spacing: 2px; color: var(--gold); font-size: 12px; }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      bottom: calc(88px + var(--safe-bottom));
+      min-width: 180px;
+      max-width: calc(100% - 34px);
+      padding: 12px 16px;
+      background: rgba(10,10,16,.92);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 16px;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: .04em;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .22s ease, transform .22s ease;
+      z-index: 25;
+      box-shadow: 0 14px 30px rgba(0,0,0,.4);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mini-card-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .mini-card strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    @media (max-width: 420px) {
+      .app { gap: 10px; padding-inline: 10px; }
+      .board { gap: 5px; padding: 7px; }
+      .topbar { padding-inline: 12px; }
+      .hero-title { font-size: 24px; }
+      .goals-wrap { grid-template-columns: 1fr; }
+      .levels-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand-title">Разнос состава</div>
+        <div class="brand-sub">Самирхан, Блэкнастя, Роза Ксю и Вова против сектора</div>
+      </div>
+      <div class="header-badges">
+        <div class="badge">
+          <div class="badge-label">Уровень</div>
+          <div class="badge-value" id="levelValue">1</div>
+        </div>
+        <div class="badge">
+          <div class="badge-label">Ходы</div>
+          <div class="badge-value" id="movesValue">0</div>
+        </div>
+        <div class="badge">
+          <div class="badge-label">Очки</div>
+          <div class="badge-value" id="scoreValue">0</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="goals-wrap" id="goalsWrap"></div>
+    </section>
+
+    <section class="board-shell">
+      <div class="boss-bar" id="bossBar">
+        <div class="boss-avatar">Б</div>
+        <div class="boss-content">
+          <div class="boss-name">Батенин сверху</div>
+          <div class="boss-desc" id="bossDesc">Скоро новое распоряжение сектора</div>
+          <div class="boss-timer"><div class="boss-timer-fill" id="bossTimerFill"></div></div>
+        </div>
+      </div>
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+      </div>
+    </section>
+
+    <footer class="footer-actions">
+      <button class="action-btn" id="menuBtn"><strong>Уровни</strong><span>Карта</span></button>
+      <button class="action-btn" id="hintBtn"><strong>Подсказка</strong><span>Ход</span></button>
+      <button class="action-btn" id="shuffleBtn"><strong>Перемешать</strong><span>Хаос</span></button>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="overlay active" id="startOverlay">
+      <div class="overlay-card">
+        <h1 class="hero-title">Разнос состава</h1>
+        <div class="hero-sub">
+          Мемный match-3 про сбор своих в ряд и борьбу против вертикали: Эмиль мешает, Паучиха душит поле паутиной, а Батенин сверху ломает правила.
+        </div>
+        <div class="pill-list">
+          <div class="pill">8×8 поле</div>
+          <div class="pill">6 уровней MVP</div>
+          <div class="pill">Эмиль / Паучиха / Батенин</div>
+          <div class="pill">Комбо и спецфишки</div>
+        </div>
+        <div class="overlay-actions">
+          <button class="primary-btn" id="startGameBtn">Играть</button>
+          <button class="secondary-btn" id="openLevelsFromStart">Выбрать уровень</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="levelsOverlay">
+      <div class="overlay-card">
+        <h2 style="margin:0">Карта уровней</h2>
+        <div class="hero-sub">Открывай новые уровни, собирай звёзды и проходи дальше до Батенина.</div>
+        <div class="levels-grid" id="levelsGrid"></div>
+        <div class="overlay-actions">
+          <button class="secondary-btn" id="resetProgressBtn">Сбросить прогресс</button>
+          <button class="primary-btn" id="closeLevelsBtn">Назад</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="resultOverlay">
+      <div class="overlay-card">
+        <h2 style="margin:0" id="resultTitle">Разнос состава</h2>
+        <div class="hero-sub" id="resultText"></div>
+        <div class="mini-card-grid" id="resultDetails"></div>
+        <div class="overlay-actions">
+          <button class="primary-btn" id="resultPrimaryBtn">Дальше</button>
+          <button class="secondary-btn" id="resultMenuBtn">К уровням</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SIZE = 8;
+    const STORAGE_KEY = 'raznos-sostava-progress-v1';
+
+    const TILE_DEFS = {
+      samir: { short: 'С', name: 'Самирхан', color: 'linear-gradient(145deg,#ff7b63,#ff3a65)' },
+      black: { short: 'Б', name: 'Блэкнастя', color: 'linear-gradient(145deg,#35243f,#9b2354)' },
+      rosa: { short: 'Р', name: 'Роза Ксю', color: 'linear-gradient(145deg,#ff9bd9,#f5b54f)' },
+      vova: { short: 'В', name: 'Вова Дискотека', color: 'linear-gradient(145deg,#3b7cff,#9b5cff)' },
+      pass: { short: 'П', name: 'Чёрный пропуск', color: 'linear-gradient(145deg,#2f2f36,#c39a42)' },
+      mic: { short: 'М', name: 'Микрофон', color: 'linear-gradient(145deg,#7e7f92,#d7d9e7)' },
+    };
+
+    const SPECIAL_LABELS = {
+      row: '—',
+      col: '|',
+      bomb: '✦',
+      blacklist: '✪'
+    };
+
+    const LEVELS = [
+      {
+        id: 1,
+        name: 'Первый состав',
+        moves: 18,
+        goals: [
+          { kind: 'collect', type: 'samir', count: 10 },
+          { kind: 'collect', type: 'black', count: 8 },
+        ],
+        setup: () => {}
+      },
+      {
+        id: 2,
+        name: 'Эмиль на созвоне',
+        moves: 22,
+        goals: [
+          { kind: 'clearEmils', count: 4 },
+          { kind: 'collect', type: 'samir', count: 8 },
+        ],
+        setup: () => spawnBlockers('emil', 4)
+      },
+      {
+        id: 3,
+        name: 'Первая паутина',
+        moves: 22,
+        goals: [
+          { kind: 'clearWebs', count: 10 },
+          { kind: 'collect', type: 'vova', count: 8 },
+        ],
+        setup: () => spawnWebs(10),
+        webEvery: 3
+      },
+      {
+        id: 4,
+        name: 'Отчётный день',
+        moves: 22,
+        goals: [
+          { kind: 'clearReports', count: 10 },
+          { kind: 'collect', type: 'rosa', count: 8 },
+        ],
+        setup: () => spawnBlockers('report', 10)
+      },
+      {
+        id: 5,
+        name: 'Скандал по вертикали',
+        moves: 24,
+        goals: [
+          { kind: 'clearEmils', count: 4 },
+          { kind: 'clearWebs', count: 10 },
+          { kind: 'specials', count: 3 },
+        ],
+        setup: () => { spawnBlockers('emil', 4); spawnWebs(8); lockRandomTiles(6); },
+        webEvery: 2
+      },
+      {
+        id: 6,
+        name: 'Батенин сверху',
+        moves: 28,
+        goals: [
+          { kind: 'collectAnyHero', count: 20 },
+          { kind: 'specials', count: 4 },
+        ],
+        setup: () => { spawnBlockers('emil', 2); spawnWebs(8); },
+        webEvery: 2,
+        boss: {
+          every: 3,
+          events: ['spawnEmil', 'spawnReports', 'spreadWebs', 'lockTiles']
+        }
+      }
+    ];
+
+    const app = {
+      board: document.getElementById('board'),
+      levelValue: document.getElementById('levelValue'),
+      movesValue: document.getElementById('movesValue'),
+      scoreValue: document.getElementById('scoreValue'),
+      goalsWrap: document.getElementById('goalsWrap'),
+      toast: document.getElementById('toast'),
+      startOverlay: document.getElementById('startOverlay'),
+      levelsOverlay: document.getElementById('levelsOverlay'),
+      resultOverlay: document.getElementById('resultOverlay'),
+      levelsGrid: document.getElementById('levelsGrid'),
+      resultTitle: document.getElementById('resultTitle'),
+      resultText: document.getElementById('resultText'),
+      resultDetails: document.getElementById('resultDetails'),
+      resultPrimaryBtn: document.getElementById('resultPrimaryBtn'),
+      bossBar: document.getElementById('bossBar'),
+      bossDesc: document.getElementById('bossDesc'),
+      bossTimerFill: document.getElementById('bossTimerFill'),
+    };
+
+    const state = {
+      board: [],
+      currentLevelIndex: 0,
+      movesLeft: 0,
+      score: 0,
+      goalsProgress: {},
+      selected: null,
+      animating: false,
+      turn: 0,
+      bossCountdown: 0,
+      hintCells: [],
+      progressStore: loadProgress(),
+    };
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { unlocked: 1, stars: {} };
+        const data = JSON.parse(raw);
+        return {
+          unlocked: Math.max(1, Math.min(LEVELS.length, data.unlocked || 1)),
+          stars: data.stars || {}
+        };
+      } catch {
+        return { unlocked: 1, stars: {} };
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progressStore));
+      buildLevelGrid();
+    }
+
+    function showToast(text) {
+      app.toast.textContent = text;
+      app.toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => app.toast.classList.remove('show'), 1050);
+    }
+
+    function openOverlay(name) {
+      app.startOverlay.classList.remove('active');
+      app.levelsOverlay.classList.remove('active');
+      app.resultOverlay.classList.remove('active');
+      if (name === 'start') app.startOverlay.classList.add('active');
+      if (name === 'levels') app.levelsOverlay.classList.add('active');
+      if (name === 'result') app.resultOverlay.classList.add('active');
+    }
+
+    function closeOverlay(name) {
+      if (name === 'start') app.startOverlay.classList.remove('active');
+      if (name === 'levels') app.levelsOverlay.classList.remove('active');
+      if (name === 'result') app.resultOverlay.classList.remove('active');
+    }
+
+    function buildLevelGrid() {
+      app.levelsGrid.innerHTML = '';
+      LEVELS.forEach((level, index) => {
+        const unlocked = index < state.progressStore.unlocked;
+        const btn = document.createElement('button');
+        btn.className = `level-chip ${unlocked ? 'unlocked' : 'locked'} level-btn`;
+        btn.disabled = !unlocked;
+        const stars = state.progressStore.stars[level.id] || 0;
+        btn.innerHTML = `
+          <div>
+            <div style="font-weight:900;font-size:18px">${level.id}</div>
+            <small>${level.name}</small>
+          </div>
+          <div class="stars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
+        `;
+        btn.addEventListener('click', () => {
+          closeOverlay('levels');
+          startLevel(index);
+        });
+        app.levelsGrid.appendChild(btn);
+      });
+    }
+
+    function randItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function cloneTile(type) {
+      return { kind: 'tile', type, special: null, web: 0, lock: 0 };
+    }
+
+    function makeBlocker(type) {
+      if (type === 'emil') return { kind: 'blocker', type: 'emil', hp: 1 };
+      return { kind: 'blocker', type: 'report', hp: 1 };
+    }
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function emptyBoard() {
+      return Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => null));
+    }
+
+    function inside(r, c) {
+      return r >= 0 && r < SIZE && c >= 0 && c < SIZE;
+    }
+
+    function posKey(r, c) {
+      return `${r}:${c}`;
+    }
+
+    function fromPosKey(key) {
+      const [r, c] = key.split(':').map(Number);
+      return { r, c };
+    }
+
+    function getLevel() {
+      return LEVELS[state.currentLevelIndex];
+    }
+
+    function initGoals() {
+      state.goalsProgress = {};
+      getLevel().goals.forEach(goal => {
+        state.goalsProgress[goalKey(goal)] = 0;
+      });
+    }
+
+    function goalKey(goal) {
+      return `${goal.kind}:${goal.type || 'all'}`;
+    }
+
+    function incrementGoal(kind, amount = 1, type = 'all') {
+      const key = `${kind}:${type}`;
+      if (state.goalsProgress[key] == null) return;
+      state.goalsProgress[key] += amount;
+    }
+
+    function goalProgress(goal) {
+      return state.goalsProgress[goalKey(goal)] || 0;
+    }
+
+    function areGoalsDone() {
+      return getLevel().goals.every(goal => goalProgress(goal) >= goal.count);
+    }
+
+    function updateHUD() {
+      app.levelValue.textContent = getLevel().id;
+      app.movesValue.textContent = state.movesLeft;
+      app.scoreValue.textContent = state.score;
+      renderGoals();
+      if (getLevel().boss) {
+        app.bossBar.style.display = 'flex';
+        const cycle = getLevel().boss.every;
+        const rem = cycle - (state.turn % cycle || cycle);
+        app.bossDesc.textContent = rem === cycle ? 'Следующее распоряжение после твоего хода' : `До распоряжения: ${rem} ход${rem === 1 ? '' : rem < 5 ? 'а' : 'ов'}`;
+        const progress = ((state.turn % cycle) / cycle) * 100;
+        app.bossTimerFill.style.width = `${Math.max(8, progress)}%`;
+      } else {
+        app.bossBar.style.display = 'none';
+      }
+    }
+
+    function renderGoals() {
+      app.goalsWrap.innerHTML = '';
+      getLevel().goals.forEach(goal => {
+        const done = goalProgress(goal) >= goal.count;
+        const div = document.createElement('div');
+        div.className = `goal-chip ${done ? 'goal-done' : ''}`;
+        let label = '';
+        let icon = '🎯';
+        let style = 'linear-gradient(145deg,#61606f,#272633)';
+
+        if (goal.kind === 'collect') {
+          const def = TILE_DEFS[goal.type];
+          label = `Собрать ${def.name}`;
+          icon = def.short;
+          style = def.color;
+        } else if (goal.kind === 'clearWebs') {
+          label = 'Снять паутину';
+          icon = '🕸';
+          style = 'linear-gradient(145deg,#6c4cff,#211530)';
+        } else if (goal.kind === 'clearEmils') {
+          label = 'Убрать Эмиля';
+          icon = 'Э';
+          style = 'linear-gradient(145deg,#60728a,#202737)';
+        } else if (goal.kind === 'clearReports') {
+          label = 'Разбить отчёты';
+          icon = '📄';
+          style = 'linear-gradient(145deg,#86768d,#342a3f)';
+        } else if (goal.kind === 'specials') {
+          label = 'Сделать спецкомбо';
+          icon = '✦';
+          style = 'linear-gradient(145deg,#ff9c52,#ff5d68)';
+        } else if (goal.kind === 'collectAnyHero') {
+          label = 'Собрать героев';
+          icon = '★';
+          style = 'linear-gradient(145deg,#ff4fd8,#7b56ff)';
+        }
+
+        div.innerHTML = `
+          <div class="goal-icon" style="background:${style}">${icon}</div>
+          <div>
+            <div class="goal-title">${label}</div>
+            <div class="goal-progress">${Math.min(goalProgress(goal), goal.count)} / ${goal.count}</div>
+          </div>
+        `;
+        app.goalsWrap.appendChild(div);
+      });
+    }
+
+    function startLevel(index) {
+      state.currentLevelIndex = index;
+      state.movesLeft = getLevel().moves;
+      state.score = 0;
+      state.turn = 0;
+      state.selected = null;
+      state.animating = false;
+      state.hintCells = [];
+      initGoals();
+      buildFreshBoard();
+      getLevel().setup();
+      ensurePlayableBoard();
+      updateHUD();
+      renderBoard();
+    }
+
+    function buildFreshBoard() {
+      state.board = emptyBoard();
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          let tile;
+          do {
+            tile = cloneTile(randItem(Object.keys(TILE_DEFS)));
+            state.board[r][c] = tile;
+          } while (createsStartingMatch(r, c));
+        }
+      }
+    }
+
+    function createsStartingMatch(r, c) {
+      const current = state.board[r][c];
+      if (!current || current.kind !== 'tile') return false;
+      const type = current.type;
+      return (
+        (c >= 2 && state.board[r][c - 1]?.kind === 'tile' && state.board[r][c - 2]?.kind === 'tile' && state.board[r][c - 1].type === type && state.board[r][c - 2].type === type) ||
+        (r >= 2 && state.board[r - 1][c]?.kind === 'tile' && state.board[r - 2][c]?.kind === 'tile' && state.board[r - 1][c].type === type && state.board[r - 2][c].type === type)
+      );
+    }
+
+    function ensurePlayableBoard() {
+      let guard = 0;
+      while ((!findAnyMove() || findAllMatches().length > 0) && guard < 50) {
+        shuffleBoard(true);
+        guard++;
+      }
+    }
+
+    function renderBoard() {
+      app.board.innerHTML = '';
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          if (state.selected && state.selected.r === r && state.selected.c === c) cell.classList.add('selected');
+          if (state.hintCells.some(h => h.r === r && h.c === c)) cell.classList.add('hint');
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          const entry = state.board[r][c];
+
+          if (entry?.kind === 'tile') {
+            const tile = document.createElement('div');
+            const def = TILE_DEFS[entry.type];
+            tile.className = 'tile';
+            if (entry.special) tile.classList.add(`special-${entry.special}`);
+            if (entry.lock > 0) tile.classList.add('locked');
+            tile.style.background = def.color;
+            tile.dataset.specialLabel = entry.special ? SPECIAL_LABELS[entry.special] : '';
+            tile.innerHTML = `
+              <div class="tile-short">${def.short}</div>
+              <div class="tile-name">${def.name}</div>
+            `;
+            if (entry.web > 0) {
+              const web = document.createElement('div');
+              web.className = 'overlay-web';
+              tile.appendChild(web);
+            }
+            cell.appendChild(tile);
+          } else if (entry?.kind === 'blocker') {
+            const blocker = document.createElement('div');
+            blocker.className = `blocker ${entry.type}`;
+            blocker.innerHTML = entry.type === 'emil'
+              ? `<div class="blocker-short">Э</div><div class="blocker-name">Эмиль</div><div class="effect-badge">давит</div>`
+              : `<div class="blocker-short">📄</div><div class="blocker-name">Отчёт</div><div class="effect-badge">мусор</div>`;
+            cell.appendChild(blocker);
+          }
+
+          cell.addEventListener('click', onCellTap);
+          cell.addEventListener('touchstart', onTouchStart, { passive: true });
+          cell.addEventListener('touchend', onTouchEnd, { passive: true });
+          app.board.appendChild(cell);
+        }
+      }
+    }
+
+    let touchStartPos = null;
+
+    function onTouchStart(e) {
+      const target = e.currentTarget;
+      touchStartPos = {
+        x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY,
+        r: Number(target.dataset.r),
+        c: Number(target.dataset.c)
+      };
+    }
+
+    function onTouchEnd(e) {
+      if (!touchStartPos) return;
+      const dx = e.changedTouches[0].clientX - touchStartPos.x;
+      const dy = e.changedTouches[0].clientY - touchStartPos.y;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      if (Math.max(absX, absY) < 18) {
+        touchStartPos = null;
+        return;
+      }
+      const from = { r: touchStartPos.r, c: touchStartPos.c };
+      const to = absX > absY
+        ? { r: from.r, c: from.c + (dx > 0 ? 1 : -1) }
+        : { r: from.r + (dy > 0 ? 1 : -1), c: from.c };
+      touchStartPos = null;
+      tryMove(from, to);
+    }
+
+    function onCellTap(e) {
+      const r = Number(e.currentTarget.dataset.r);
+      const c = Number(e.currentTarget.dataset.c);
+      if (state.animating) return;
+      const cell = state.board[r][c];
+      if (!cell || cell.kind !== 'tile') {
+        state.selected = null;
+        renderBoard();
+        return;
+      }
+      if (cell.lock > 0 || cell.web > 0) {
+        showToast(cell.lock > 0 ? 'КЛЕТКА ЗАБЛОКИРОВАНА' : 'ПАУТИНА МЕШАЕТ');
+      }
+      if (!state.selected) {
+        state.selected = { r, c };
+      } else if (state.selected.r === r && state.selected.c === c) {
+        state.selected = null;
+      } else {
+        const prev = state.selected;
+        if (isAdjacent(prev, { r, c })) {
+          tryMove(prev, { r, c });
+        } else {
+          state.selected = { r, c };
+        }
+      }
+      renderBoard();
+    }
+
+    function isAdjacent(a, b) {
+      return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
+    }
+
+    function isMovableCell(r, c) {
+      const cell = state.board[r][c];
+      return cell && cell.kind === 'tile' && cell.lock === 0 && cell.web === 0;
+    }
+
+    async function tryMove(from, to) {
+      if (!inside(to.r, to.c)) return;
+      if (!isMovableCell(from.r, from.c) || !isMovableCell(to.r, to.c)) {
+        showToast('НЕЛЬЗЯ СДВИНУТЬ');
+        state.selected = null;
+        renderBoard();
+        return;
+      }
+      state.animating = true;
+      state.selected = null;
+      swapCells(from, to);
+      renderBoard();
+      await wait(100);
+
+      let specialTriggered = tryDirectSpecialSwap(from, to);
+      let matches = findAllMatches();
+      if (!specialTriggered && matches.length === 0) {
+        swapCells(from, to);
+        renderBoard();
+        showToast('НЕ СОБРАЛОСЬ');
+        state.animating = false;
+        return;
+      }
+
+      state.movesLeft = Math.max(0, state.movesLeft - 1);
+      state.turn++;
+      state.score += 10;
+      updateHUD();
+
+      if (specialTriggered) {
+        await resolveCascade();
+      } else {
+        await processMatches(matches, { from, to });
+      }
+
+      afterPlayerTurn();
+      checkEndConditions();
+      state.animating = false;
+    }
+
+    function tryDirectSpecialSwap(from, to) {
+      const a = state.board[from.r][from.c];
+      const b = state.board[to.r][to.c];
+      if (a.kind !== 'tile' || b.kind !== 'tile') return false;
+      if (!a.special && !b.special) return false;
+
+      const targets = new Set();
+      const addPos = (r, c) => { if (inside(r, c)) targets.add(posKey(r, c)); };
+
+      if (a.special === 'blacklist') {
+        removeAllOfType(b.type, targets);
+      }
+      if (b.special === 'blacklist') {
+        removeAllOfType(a.type, targets);
+      }
+      if (a.special === 'bomb' || b.special === 'bomb') {
+        bombArea(from.r, from.c, 1, targets);
+        bombArea(to.r, to.c, 1, targets);
+      }
+      if (a.special === 'row' || b.special === 'row') {
+        rowBlast(from.r, targets);
+        rowBlast(to.r, targets);
+      }
+      if (a.special === 'col' || b.special === 'col') {
+        colBlast(from.c, targets);
+        colBlast(to.c, targets);
+      }
+
+      if (targets.size === 0) {
+        bombArea(from.r, from.c, 1, targets);
+        bombArea(to.r, to.c, 1, targets);
+      }
+
+      showToast('РАЗНОС');
+      state.score += 60;
+      incrementGoal('specials', 1);
+      removeByKeys(targets);
+      return true;
+    }
+
+    function removeAllOfType(type, targetSet) {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = state.board[r][c];
+          if (cell?.kind === 'tile' && cell.type === type) targetSet.add(posKey(r, c));
+        }
+      }
+    }
+
+    function rowBlast(r, targetSet) {
+      for (let c = 0; c < SIZE; c++) targetSet.add(posKey(r, c));
+    }
+
+    function colBlast(c, targetSet) {
+      for (let r = 0; r < SIZE; r++) targetSet.add(posKey(r, c));
+    }
+
+    function bombArea(r, c, radius, targetSet) {
+      for (let rr = r - radius; rr <= r + radius; rr++) {
+        for (let cc = c - radius; cc <= c + radius; cc++) {
+          if (inside(rr, cc)) targetSet.add(posKey(rr, cc));
+        }
+      }
+    }
+
+    async function processMatches(groups, moveInfo) {
+      let createdSpecial = null;
+      for (const cluster of groups) {
+        const sample = state.board[cluster[0].r][cluster[0].c];
+        if (!sample || sample.kind !== 'tile') continue;
+
+        let specialType = null;
+        if (cluster.length >= 5) {
+          specialType = 'blacklist';
+        } else {
+          const rows = new Set(cluster.map(p => p.r));
+          const cols = new Set(cluster.map(p => p.c));
+          if (rows.size > 1 && cols.size > 1) specialType = 'bomb';
+          else if (cluster.length === 4) {
+            specialType = rows.size === 1 ? 'row' : 'col';
+          }
+        }
+
+        if (specialType) {
+          const spawnPos = pickSpawnForSpecial(cluster, moveInfo);
+          createdSpecial = { pos: spawnPos, type: sample.type, specialType };
+        }
+      }
+
+      const toRemove = new Set();
+      groups.forEach(cluster => cluster.forEach(p => toRemove.add(posKey(p.r, p.c))));
+      if (createdSpecial) toRemove.delete(posKey(createdSpecial.pos.r, createdSpecial.pos.c));
+
+      removeByKeys(toRemove);
+      if (createdSpecial) {
+        state.board[createdSpecial.pos.r][createdSpecial.pos.c] = cloneTile(createdSpecial.type);
+        state.board[createdSpecial.pos.r][createdSpecial.pos.c].special = createdSpecial.specialType;
+        incrementGoal('specials', 1);
+        showToast(createdSpecial.specialType === 'blacklist' ? 'ЧЁРНЫЙ СПИСОК' : createdSpecial.specialType === 'bomb' ? 'СКАНДАЛ' : 'МИКРОФОН');
+      }
+
+      await resolveCascade();
+    }
+
+    function pickSpawnForSpecial(cluster, moveInfo) {
+      if (cluster.some(p => p.r === moveInfo.to.r && p.c === moveInfo.to.c)) return moveInfo.to;
+      if (cluster.some(p => p.r === moveInfo.from.r && p.c === moveInfo.from.c)) return moveInfo.from;
+      return cluster[0];
+    }
+
+    function removeByKeys(keys) {
+      keys.forEach(key => {
+        const { r, c } = fromPosKey(key);
+        damageCell(r, c);
+      });
+    }
+
+    function damageCell(r, c) {
+      const cell = state.board[r][c];
+      if (!cell) return;
+      if (cell.kind === 'blocker') {
+        cell.hp -= 1;
+        if (cell.hp <= 0) {
+          if (cell.type === 'emil') incrementGoal('clearEmils', 1);
+          if (cell.type === 'report') incrementGoal('clearReports', 1);
+          state.board[r][c] = null;
+          state.score += 20;
+        }
+        return;
+      }
+      if (cell.kind === 'tile') {
+        if (cell.web > 0) {
+          cell.web -= 1;
+          incrementGoal('clearWebs', 1);
+          state.score += 5;
+        } else {
+          if (['samir','black','rosa','vova'].includes(cell.type)) incrementGoal('collect', 1, cell.type);
+          if (['samir','black','rosa','vova'].includes(cell.type)) incrementGoal('collectAnyHero', 1);
+          state.board[r][c] = null;
+          state.score += 15;
+        }
+      }
+    }
+
+    async function resolveCascade() {
+      while (true) {
+        await collapseBoard();
+        const matches = findAllMatches();
+        if (!matches.length) break;
+        state.score += 25;
+        await processMatches(matches, { from: matches[0][0], to: matches[0][0] });
+        return;
+      }
+      renderBoard();
+      updateHUD();
+      if (!findAnyMove()) {
+        shuffleBoard();
+        showToast('ВСЁ ПОПЛЫЛО');
+      }
+    }
+
+    async function collapseBoard() {
+      for (let c = 0; c < SIZE; c++) {
+        const stack = [];
+        for (let r = SIZE - 1; r >= 0; r--) {
+          const cell = state.board[r][c];
+          if (cell && !(cell.kind === 'blocker')) stack.push(cell);
+        }
+        for (let r = SIZE - 1; r >= 0; r--) {
+          if (state.board[r][c]?.kind === 'blocker') continue;
+          const next = stack.shift();
+          state.board[r][c] = next || null;
+        }
+        for (let r = SIZE - 1; r >= 0; r--) {
+          if (!state.board[r][c]) {
+            state.board[r][c] = cloneTile(randItem(Object.keys(TILE_DEFS)));
+          }
+        }
+      }
+      renderBoard();
+      await wait(120);
+    }
+
+    function findAllMatches() {
+      const matches = [];
+
+      for (let r = 0; r < SIZE; r++) {
+        let runType = null, runStart = 0, runLen = 0;
+        for (let c = 0; c <= SIZE; c++) {
+          const cell = c < SIZE ? state.board[r][c] : null;
+          const type = cell && cell.kind === 'tile' ? cell.type : null;
+          if (type && type === runType) {
+            runLen++;
+          } else {
+            if (runType && runLen >= 3) {
+              matches.push(Array.from({ length: runLen }, (_, i) => ({ r, c: runStart + i })));
+            }
+            runType = type;
+            runStart = c;
+            runLen = type ? 1 : 0;
+          }
+        }
+      }
+
+      for (let c = 0; c < SIZE; c++) {
+        let runType = null, runStart = 0, runLen = 0;
+        for (let r = 0; r <= SIZE; r++) {
+          const cell = r < SIZE ? state.board[r][c] : null;
+          const type = cell && cell.kind === 'tile' ? cell.type : null;
+          if (type && type === runType) {
+            runLen++;
+          } else {
+            if (runType && runLen >= 3) {
+              matches.push(Array.from({ length: runLen }, (_, i) => ({ r: runStart + i, c })));
+            }
+            runType = type;
+            runStart = r;
+            runLen = type ? 1 : 0;
+          }
+        }
+      }
+      return mergeMatches(matches);
+    }
+
+    function mergeMatches(groups) {
+      const merged = [];
+      const seen = new Set();
+      for (let i = 0; i < groups.length; i++) {
+        if (seen.has(i)) continue;
+        const cluster = new Set(groups[i].map(p => posKey(p.r, p.c)));
+        let changed = true;
+        while (changed) {
+          changed = false;
+          for (let j = 0; j < groups.length; j++) {
+            if (seen.has(j) || i === j) continue;
+            if (groups[j].some(p => cluster.has(posKey(p.r, p.c)))) {
+              groups[j].forEach(p => cluster.add(posKey(p.r, p.c)));
+              seen.add(j);
+              changed = true;
+            }
+          }
+        }
+        merged.push(Array.from(cluster).map(fromPosKey));
+      }
+      return merged;
+    }
+
+    function swapCells(a, b) {
+      const temp = state.board[a.r][a.c];
+      state.board[a.r][a.c] = state.board[b.r][b.c];
+      state.board[b.r][b.c] = temp;
+    }
+
+    function boardSnapshot() {
+      return deepClone(state.board);
+    }
+
+    function restoreSnapshot(snapshot) {
+      state.board = snapshot;
+    }
+
+    function findAnyMove() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const from = { r, c };
+          if (!isMovableCell(r, c)) continue;
+          const dirs = [[1,0],[0,1]];
+          for (const [dr, dc] of dirs) {
+            const to = { r: r + dr, c: c + dc };
+            if (!inside(to.r, to.c) || !isMovableCell(to.r, to.c)) continue;
+            const snap = boardSnapshot();
+            swapCells(from, to);
+            const ok = findAllMatches().length > 0 || tryDirectSpecialSwap(from, to);
+            restoreSnapshot(snap);
+            if (ok) return { from, to };
+          }
+        }
+      }
+      return null;
+    }
+
+    function highlightHint() {
+      const move = findAnyMove();
+      state.hintCells = move ? [move.from, move.to] : [];
+      renderBoard();
+      setTimeout(() => {
+        state.hintCells = [];
+        renderBoard();
+      }, 1400);
+      if (!move) showToast('Ходов не найдено');
+    }
+
+    function shuffleBoard(force = false) {
+      if (state.animating && !force) return;
+      const movable = [];
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = state.board[r][c];
+          if (cell && cell.kind === 'tile') movable.push(cell);
+        }
+      }
+      do {
+        for (let i = movable.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [movable[i], movable[j]] = [movable[j], movable[i]];
+        }
+        let idx = 0;
+        for (let r = 0; r < SIZE; r++) {
+          for (let c = 0; c < SIZE; c++) {
+            if (state.board[r][c] && state.board[r][c].kind === 'tile') {
+              state.board[r][c] = movable[idx++];
+            }
+          }
+        }
+      } while (findAllMatches().length > 0 || !findAnyMove());
+      renderBoard();
+      updateHUD();
+    }
+
+    function afterPlayerTurn() {
+      const level = getLevel();
+      if (level.webEvery && state.turn % level.webEvery === 0) {
+        spawnWebs(level.id >= 5 ? 2 : 1);
+        showToast('ПАУТИНА');
+      }
+      if (level.boss && state.turn % level.boss.every === 0) {
+        triggerBossEvent();
+      }
+      reduceLocks();
+    }
+
+    function spawnWebs(count) {
+      let added = 0;
+      let attempts = 0;
+      while (added < count && attempts < 200) {
+        attempts++;
+        const spot = randomFreeCell((cell) => cell.kind === 'tile' && cell.web === 0);
+        if (!spot) break;
+        state.board[spot.r][spot.c].web = 1;
+        added++;
+      }
+    }
+
+    function spawnBlockers(type, count) {
+      let added = 0;
+      let attempts = 0;
+      while (added < count && attempts < 200) {
+        attempts++;
+        const spot = randomFreeCell((cell) => cell.kind === 'tile' && cell.web === 0 && !cell.special);
+        if (!spot) break;
+        state.board[spot.r][spot.c] = makeBlocker(type);
+        added++;
+      }
+    }
+
+    function lockRandomTiles(count) {
+      let added = 0;
+      let attempts = 0;
+      while (added < count && attempts < 250) {
+        attempts++;
+        const spot = randomFreeCell((cell) => cell.kind === 'tile' && cell.lock === 0);
+        if (!spot) break;
+        state.board[spot.r][spot.c].lock = 1;
+        added++;
+      }
+    }
+
+    function randomFreeCell(filter) {
+      const spots = [];
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = state.board[r][c];
+          if (cell && filter(cell, r, c)) spots.push({ r, c });
+        }
+      }
+      if (!spots.length) return null;
+      return randItem(spots);
+    }
+
+    function reduceLocks() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = state.board[r][c];
+          if (cell && cell.kind === 'tile' && cell.lock > 0) cell.lock--;
+        }
+      }
+    }
+
+    function triggerBossEvent() {
+      const level = getLevel();
+      const event = randItem(level.boss.events);
+      if (event === 'spawnEmil') {
+        spawnBlockers('emil', 2);
+        showToast('СВЕРХУ ПРИШЛО');
+      } else if (event === 'spawnReports') {
+        spawnBlockers('report', 3);
+        showToast('ОТЧЁТЫ');
+      } else if (event === 'spreadWebs') {
+        spawnWebs(3);
+        showToast('ДАВЛЕНИЕ');
+      } else if (event === 'lockTiles') {
+        lockRandomTiles(3);
+        showToast('БЛОК');
+      }
+      renderBoard();
+      updateHUD();
+    }
+
+    function checkEndConditions() {
+      if (areGoalsDone()) {
+        finishLevel(true);
+        return;
+      }
+      if (state.movesLeft <= 0) {
+        finishLevel(false);
+      }
+    }
+
+    function calcStars() {
+      const remaining = state.movesLeft;
+      if (remaining >= 8) return 3;
+      if (remaining >= 4) return 2;
+      return 1;
+    }
+
+    function finishLevel(win) {
+      state.animating = true;
+      let primaryLabel = 'Заново';
+      let primaryAction = () => {
+        closeOverlay('result');
+        startLevel(state.currentLevelIndex);
+      };
+
+      if (win) {
+        const stars = calcStars();
+        const levelId = getLevel().id;
+        state.progressStore.stars[levelId] = Math.max(state.progressStore.stars[levelId] || 0, stars);
+        state.progressStore.unlocked = Math.max(state.progressStore.unlocked, Math.min(LEVELS.length, levelId + 1));
+        saveProgress();
+        app.resultTitle.textContent = stars === 3 ? 'Разнёс состав' : stars === 2 ? 'Шум пошёл' : 'Нормально';
+        app.resultText.textContent = `Уровень ${levelId} пройден. Звёзды: ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}`;
+        if (state.currentLevelIndex < LEVELS.length - 1) {
+          primaryLabel = 'Следующий';
+          primaryAction = () => {
+            closeOverlay('result');
+            state.animating = false;
+            startLevel(state.currentLevelIndex + 1);
+          };
+        } else {
+          primaryLabel = 'Ещё раз';
+        }
+      } else {
+        app.resultTitle.textContent = 'Состав поплыл';
+        app.resultText.textContent = 'Ходы закончились. Эмиль, Паучиха и Батенин дожали поле.';
+      }
+
+      app.resultDetails.innerHTML = '';
+      getLevel().goals.forEach(goal => {
+        const item = document.createElement('div');
+        item.className = 'mini-card';
+        item.innerHTML = `<strong>${goal.kind === 'collect' ? 'Собрать ' + TILE_DEFS[goal.type].name : goal.kind === 'clearWebs' ? 'Снять паутину' : goal.kind === 'clearEmils' ? 'Убрать Эмиля' : goal.kind === 'clearReports' ? 'Разбить отчёты' : goal.kind === 'specials' ? 'Сделать спецкомбо' : 'Собрать героев'}</strong><span>${Math.min(goalProgress(goal), goal.count)}/${goal.count}</span>`;
+        app.resultDetails.appendChild(item);
+      });
+
+      app.resultPrimaryBtn.textContent = primaryLabel;
+      app.resultPrimaryBtn.onclick = primaryAction;
+      openOverlay('result');
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    document.getElementById('startGameBtn').addEventListener('click', () => {
+      closeOverlay('start');
+      startLevel(0);
+    });
+    document.getElementById('openLevelsFromStart').addEventListener('click', () => openOverlay('levels'));
+    document.getElementById('menuBtn').addEventListener('click', () => openOverlay('levels'));
+    document.getElementById('closeLevelsBtn').addEventListener('click', () => closeOverlay('levels'));
+    document.getElementById('hintBtn').addEventListener('click', highlightHint);
+    document.getElementById('shuffleBtn').addEventListener('click', () => {
+      shuffleBoard();
+      showToast('ПОЛЕ ПЕРЕМЕШАНО');
+    });
+    document.getElementById('resultMenuBtn').addEventListener('click', () => {
+      closeOverlay('result');
+      state.animating = false;
+      openOverlay('levels');
+    });
+    document.getElementById('resetProgressBtn').addEventListener('click', () => {
+      if (!confirm('Сбросить звёзды и открытые уровни?')) return;
+      state.progressStore = { unlocked: 1, stars: {} };
+      saveProgress();
+      buildLevelGrid();
+      showToast('Прогресс сброшен');
+    });
+
+    // Init
+    buildLevelGrid();
+    updateHUD();
+  </script>
+</body>
+</html>
