@@ -16,8 +16,10 @@
     --border:rgba(255,255,255,.16);
     --good:#92ffb0;
     --bad:#ff8a8a;
+    --warn:#ffcb72;
   }
   *{box-sizing:border-box}
+  html,body{height:100%}
   body{
     margin:0;
     font-family: Inter, Arial, system-ui, sans-serif;
@@ -31,92 +33,54 @@
     align-items:center;
     justify-content:center;
     padding:12px;
-  }
-  .wrap{width:min(1100px, 100%);}
-  .title{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-    margin-bottom:10px;flex-wrap:wrap;
-  }
-  .title h1{font-size:clamp(24px,3.2vw,42px);margin:0;letter-spacing:.5px}
-  .title .tag{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--panel);font-size:14px;opacity:.95}
-  .game-shell{
-    position:relative;
-    border:1px solid var(--border);
-    border-radius:22px;
     overflow:hidden;
-    box-shadow:0 30px 80px rgba(0,0,0,.45);
-    background:#0f1018;
   }
+  .wrap{width:min(1120px, 100%)}
+  .title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .title h1{font-size:clamp(24px,3.2vw,42px);margin:0;letter-spacing:.3px}
+  .title .tag{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--panel);font-size:14px;opacity:.95}
+  .game-shell{position:relative;border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);background:#0f1018}
   canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#140f1d}
-  .hud{
-    position:absolute;inset:0;pointer-events:none;
-  }
-  .topbar{
-    position:absolute;left:14px;right:14px;top:14px;
-    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
-  }
-  .card{
-    pointer-events:auto;
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:10px 12px;
-    backdrop-filter: blur(10px);
-  }
-  .score{min-width:160px}
+  .hud{position:absolute;inset:0;pointer-events:none}
+  .topbar{position:absolute;left:14px;right:14px;top:14px;display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px}
+  .card{pointer-events:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:10px 12px;backdrop-filter:blur(10px)}
   .score b{font-size:26px;display:block;line-height:1.05}
   .small{font-size:12px;opacity:.8}
-  .controls-note{font-size:13px;max-width:420px;line-height:1.35}
-  .center-panel{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;
-  }
-  .overlay{
-    max-width:680px;width:min(100%,680px);text-align:center;
-    background:rgba(12,12,20,.80);backdrop-filter: blur(12px);
-    border:1px solid rgba(255,255,255,.15);
-    border-radius:24px;padding:22px 18px 18px;
-    box-shadow:0 20px 70px rgba(0,0,0,.40);
-    pointer-events:auto;
-  }
+  .line{display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .hearts{font-size:24px;letter-spacing:2px}
+  .ultbar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid rgba(255,255,255,.08);margin-top:7px}
+  .ultfill{height:100%;width:0%;background:linear-gradient(90deg,#8cf6ff,#ffd34e)}
+  .status{font-size:13px;line-height:1.35}
+  .center-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+  .overlay{max-width:720px;width:min(100%,720px);text-align:center;background:rgba(12,12,20,.82);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:22px 18px 18px;box-shadow:0 20px 70px rgba(0,0,0,.40);pointer-events:auto}
   .overlay h2{margin:0 0 8px;font-size:clamp(24px,4vw,42px)}
-  .overlay p{margin:8px auto;max-width:560px;line-height:1.45;opacity:.92}
+  .overlay p{margin:8px auto;max-width:600px;line-height:1.45;opacity:.92}
   .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
-  button{
-    appearance:none;border:none;cursor:pointer;
-    background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.05));
-    color:var(--text);padding:14px 14px;border-radius:16px;
-    border:1px solid rgba(255,255,255,.16);
-    font-weight:800;font-size:16px;transition:.18s transform, .18s background, .18s border-color;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    user-select:none;
-  }
+  button{appearance:none;border:none;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.05));color:var(--text);padding:14px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.16);font-weight:800;font-size:16px;transition:.18s transform,.18s background,.18s border-color;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
   button:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.28)}
   button.primary{background:linear-gradient(180deg,#ffcc46,#f2a300);color:#221400;border-color:transparent}
   button.secondary{background:linear-gradient(180deg,#8cf6ff,#2ec9ff);color:#00131d;border-color:transparent}
+  button.warn{background:linear-gradient(180deg,#ff89b4,#ff5c95);color:#2c0713;border-color:transparent}
   .subbuttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
   .footer-note{font-size:12px;opacity:.75;margin-top:12px}
-  .bottom-ui{
-    position:absolute;left:12px;right:12px;bottom:12px;
-    display:flex;justify-content:space-between;align-items:end;gap:12px;
-  }
-  .speech{max-width:min(62%,560px);font-weight:700}
+  .bottom-ui{position:absolute;left:12px;right:12px;bottom:12px;display:flex;justify-content:space-between;align-items:end;gap:12px}
+  .speech{max-width:min(58%,560px);font-weight:700}
   .speaker{font-size:12px;opacity:.75;margin-bottom:3px}
-  .mobile-controls{display:flex;gap:10px;pointer-events:auto}
-  .mobile-controls button{min-width:115px;padding:16px 18px;font-size:18px}
-  .ghost{opacity:.75}
-  .legend{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;text-align:left
-  }
+  .mobile-controls{display:flex;gap:10px;pointer-events:auto;align-items:flex-end}
+  .mobile-controls button{min-width:110px;padding:16px 18px;font-size:18px}
+  .mobile-controls .ult{min-width:90px}
+  .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px;text-align:left}
   .legend div{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
   .hit{color:var(--bad)}
   .safe{color:var(--good)}
+  .warn-text{color:var(--warn)}
+  .banner{position:absolute;left:50%;top:100px;transform:translateX(-50%);padding:10px 18px;border-radius:999px;background:rgba(255,92,149,.18);border:1px solid rgba(255,92,149,.45);font-weight:900;letter-spacing:.5px;backdrop-filter:blur(8px);pointer-events:none;opacity:0;transition:opacity .15s}
+  .banner.show{opacity:1}
+  .mini{font-size:11px;opacity:.7}
   body.state-menu .topbar,
   body.state-gameover .topbar,
   body.state-menu .bottom-ui,
-  body.state-gameover .bottom-ui{
-    display:none;
-  }
+  body.state-gameover .bottom-ui{display:none}
   @media (max-width:760px){
     body{padding:8px;align-items:flex-start}
     .wrap{width:100%}
@@ -125,593 +89,570 @@
     .title .tag{font-size:12px;padding:7px 10px}
     .game-shell{border-radius:18px}
     canvas{aspect-ratio:10/16;min-height:72vh}
+    .topbar{left:8px;right:8px;top:8px;grid-template-columns:1fr;gap:8px}
+    .card{padding:9px 10px}
+    .score b{font-size:22px}
     .center-panel{padding:10px}
-    .overlay{
-      width:100%;max-width:none;border-radius:18px;padding:16px 12px 14px;
-      max-height:min(86vh,760px);overflow:auto;
-    }
+    .overlay{width:100%;max-width:none;border-radius:18px;padding:16px 12px 14px;max-height:min(86vh,760px);overflow:auto}
     .overlay h2{font-size:clamp(22px,8vw,34px)}
     .overlay p{font-size:14px;line-height:1.35;margin:6px auto}
-    .modes{grid-template-columns:1fr;gap:8px;margin:12px 0}
-    .legend{grid-template-columns:1fr;gap:6px;margin-top:10px}
-    .legend div{padding:8px 10px;font-size:13px}
-    .subbuttons{gap:8px;margin-top:8px}
+    .modes,.legend{grid-template-columns:1fr;gap:8px;margin-top:10px}
     button{padding:13px 12px;font-size:15px;border-radius:14px}
-    .bottom-ui{
-      left:8px;right:8px;bottom:8px;gap:8px;align-items:stretch;
-      flex-direction:column;display:flex;
-    }
-    .speech{
-      order:1;max-width:none;width:100%;font-size:13px;
-      padding:10px 12px;border-radius:14px;
-    }
+    .bottom-ui{left:8px;right:8px;bottom:8px;gap:8px;align-items:stretch;flex-direction:column;display:flex}
+    .speech{order:1;max-width:none;width:100%;font-size:13px;padding:10px 12px;border-radius:14px}
     .speaker{font-size:11px}
-    .mobile-controls{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .mobile-controls button{min-width:0;width:100%;padding:15px 10px;font-size:16px}
-    .score{min-width:auto}
-    .score b{font-size:22px}
-    .controls-note{font-size:12px;max-width:100%}
-    .topbar{left:8px;right:8px;top:8px;gap:8px;flex-direction:column}
-    .topbar .card{width:100%}
+    .mobile-controls{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:8px}
+    .mobile-controls button{min-width:0;width:100%;padding:15px 10px;font-size:15px}
+    .banner{top:74px;font-size:13px;padding:8px 12px;max-width:85%;text-align:center}
   }
 </style>
 </head>
 <body class="state-menu">
-  <div class="wrap">
-    <div class="title">
-      <h1>Самирхан: Уворот века</h1>
-      <div class="tag">мемный браузерный prototype MVP</div>
-    </div>
+<div class="wrap">
+  <div class="title">
+    <h1>Самирхан: Уворот века</h1>
+    <div class="tag">v2 — жизни, боссы, ульта, комбо</div>
+  </div>
+  <div class="game-shell">
+    <canvas id="game" width="1280" height="720"></canvas>
+    <div class="hud">
+      <div class="banner" id="banner"></div>
+      <div class="topbar">
+        <div class="card score">
+          <div class="line"><span class="small">Счёт</span><span class="small">Рекорд: <span id="bestValue">0</span></span></div>
+          <b id="scoreValue">0</b>
+          <div class="line"><span class="small">Волна: <span id="waveValue">1</span></span><span class="small">Комбо: <span id="comboValue">0</span></span></div>
+        </div>
+        <div class="card">
+          <div class="line"><span class="small">Жизни</span><span class="hearts" id="heartsValue">❤️❤️❤️</span></div>
+          <div class="small" id="bossValue">До босса: 25с</div>
+          <div class="small">P — пауза</div>
+        </div>
+        <div class="card">
+          <div class="line"><span class="small">Ульта «Харизма»</span><span class="small" id="ultHint">0%</span></div>
+          <div class="ultbar"><div class="ultfill" id="ultFill"></div></div>
+          <div class="status" id="statusText">Накопи 100% и жми U или кнопку ULT.</div>
+        </div>
+      </div>
 
-    <div class="game-shell">
-      <canvas id="game" width="1280" height="720"></canvas>
-
-      <div class="hud">
-        <div class="topbar">
-          <div class="card score">
-            <div class="small">Счёт</div>
-            <b id="scoreValue">0</b>
-            <div class="small">Рекорд: <span id="bestValue">0</span></div>
+      <div class="center-panel" id="menuPanel">
+        <div class="overlay">
+          <h2>Готов к мемному выживанию?</h2>
+          <p>Теперь Самирхан не просто прыгает. У него 3 жизни, комбо за стиль, босс-волны каждые 25 секунд и ульта «Харизма», которая замедляет хаос.</p>
+          <div class="modes">
+            <button class="secondary" data-mode="spider">🕷️ Паучиха</button>
+            <button class="secondary" data-mode="emil">😎 Эмиль</button>
+            <button class="primary" data-mode="both">🔥 Оба сразу</button>
           </div>
-          <div class="card controls-note">
-            <div><b>Управление</b></div>
-            <div>Пробел / ↑ / тап по кнопке — прыжок</div>
-            <div>↓ / S / кнопка — пригнуться</div>
+          <div class="subbuttons">
+            <button id="startBtn" class="primary">СТАРТ</button>
+          </div>
+          <div class="legend">
+            <div><b class="safe">Прыгай</b><br/>через низкие броски.</div>
+            <div><b class="safe">Пригибайся</b><br/>под высокие броски.</div>
+            <div><b class="warn-text">Лови обманки</b><br/>падающие сверху предметы меняют траекторию.</div>
+            <div><b class="hit">Переживи двойные комбо</b><br/>иногда летят сразу две проблемы подряд.</div>
+          </div>
+          <div class="footer-note">Пока без большой графики, но уже с нормальным мясом по геймплею.</div>
+        </div>
+      </div>
+
+      <div class="center-panel" id="pausePanel" style="display:none">
+        <div class="overlay">
+          <h2>Пауза</h2>
+          <p>Самирхан перевёл дух. Можно вернуться в бой или выйти в меню.</p>
+          <div class="subbuttons">
+            <button id="resumeBtn" class="primary">ПРОДОЛЖИТЬ</button>
+            <button id="pauseMenuBtn">В МЕНЮ</button>
           </div>
         </div>
+      </div>
 
-        <div class="center-panel" id="menuPanel">
-          <div class="overlay">
-            <h2>Кто сегодня кидает?</h2>
-            <p>
-              Самирхан должен выжить в этой великой битве мемов. Выбери режим,
-              нажми старт и уворачивайся от летящих предметов.
-            </p>
-            <div class="modes">
-              <button class="secondary" data-mode="spider">🕷️ Паучиха</button>
-              <button class="secondary" data-mode="emil">😎 Эмиль</button>
-              <button class="primary" data-mode="both">🔥 Оба сразу</button>
-            </div>
-            <div class="subbuttons">
-              <button id="startBtn" class="primary">СТАРТ</button>
-            </div>
-            <div class="legend">
-              <div><b class="safe">Прыгай</b><br/>через низкие предметы: кроссовок, шаурму, банку и прочий мемный абсурд.</div>
-              <div><b class="safe">Пригибайся</b><br/>под высокие броски: тапок судьбы, пакет позора, летящий позорный предмет.</div>
-              <div><b class="hit">Не врежься</b><br/>одно касание — и легенда временно падает. Но кнопку restart никто не отменял.</div>
-            </div>
-            <div class="footer-note">Сделано чисто для ржача. Потом можно заменить предметы, лица и фразы на ваши локальные мемы.</div>
+      <div class="center-panel" id="gameOverPanel" style="display:none">
+        <div class="overlay">
+          <h2 id="resultTitle">Самирхан пал… но красиво</h2>
+          <p id="resultText">Ты продержался 0 секунд.</p>
+          <div class="subbuttons">
+            <button id="restartBtn" class="primary">ЕЩЁ РАЗ</button>
+            <button id="menuBtn">В МЕНЮ</button>
           </div>
+          <div class="footer-note" id="resultFooter">Следующий заход будет ещё мощнее.</div>
         </div>
+      </div>
 
-        <div class="center-panel" id="gameOverPanel" style="display:none">
-          <div class="overlay">
-            <h2>Самирхан пал… но стильно</h2>
-            <p id="resultText">Ты продержался 0 секунд.</p>
-            <div class="subbuttons">
-              <button id="restartBtn" class="primary">ЕЩЁ РАЗ</button>
-              <button id="menuBtn">В МЕНЮ</button>
-            </div>
-            <div class="footer-note">Следующая версия может быть ещё безумнее: фотки лиц, озвучка, локальные шутки, супербоссы.</div>
-          </div>
+      <div class="bottom-ui">
+        <div class="card speech" id="speechBubble">
+          <div class="speaker" id="speechWho">Ведущий</div>
+          <div id="speechText">Нажми «Старт», и Самирхан начнёт свой героический путь.</div>
         </div>
-
-        <div class="bottom-ui">
-          <div class="card speech" id="speechBubble">
-            <div class="speaker" id="speechWho">Ведущий</div>
-            <div id="speechText">Нажми «Старт», и Самирхан начнёт свой героический путь.</div>
-          </div>
-          <div class="mobile-controls">
-            <button id="jumpBtn" class="primary">ПРЫЖОК</button>
-            <button id="duckBtn">ПРИГИБ</button>
-          </div>
+        <div class="mobile-controls">
+          <button id="jumpBtn" class="primary">ПРЫЖОК</button>
+          <button id="duckBtn">ПРИГИБ</button>
+          <button id="ultBtn" class="warn ult">ULT</button>
         </div>
       </div>
     </div>
   </div>
-
+</div>
 <script>
 (() => {
   'use strict';
-
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const groundY = H - 120;
 
   const scoreValue = document.getElementById('scoreValue');
   const bestValue = document.getElementById('bestValue');
+  const waveValue = document.getElementById('waveValue');
+  const comboValue = document.getElementById('comboValue');
+  const heartsValue = document.getElementById('heartsValue');
+  const bossValue = document.getElementById('bossValue');
+  const ultFill = document.getElementById('ultFill');
+  const ultHint = document.getElementById('ultHint');
+  const statusText = document.getElementById('statusText');
   const speechWho = document.getElementById('speechWho');
   const speechText = document.getElementById('speechText');
+  const banner = document.getElementById('banner');
+
   const menuPanel = document.getElementById('menuPanel');
+  const pausePanel = document.getElementById('pausePanel');
   const gameOverPanel = document.getElementById('gameOverPanel');
   const startBtn = document.getElementById('startBtn');
   const restartBtn = document.getElementById('restartBtn');
   const menuBtn = document.getElementById('menuBtn');
+  const pauseMenuBtn = document.getElementById('pauseMenuBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
   const jumpBtn = document.getElementById('jumpBtn');
   const duckBtn = document.getElementById('duckBtn');
+  const ultBtn = document.getElementById('ultBtn');
+  const resultTitle = document.getElementById('resultTitle');
   const resultText = document.getElementById('resultText');
+  const resultFooter = document.getElementById('resultFooter');
   const modeButtons = [...document.querySelectorAll('[data-mode]')];
 
-  let safeStorage = {
-    getItem(){ return null; },
-    setItem(){},
-  };
+  let safeStorage = {getItem(){return null;}, setItem(){}};
   try {
     const probe = '__samirkhan_probe__';
-    window.localStorage.setItem(probe, '1');
-    window.localStorage.removeItem(probe);
-    safeStorage = window.localStorage;
-  } catch (e) {}
-
-  const W = canvas.width;
-  const H = canvas.height;
-  const groundY = H - 120;
+    localStorage.setItem(probe,'1');
+    localStorage.removeItem(probe);
+    safeStorage = localStorage;
+  } catch(e) {}
 
   let gameMode = 'both';
   let running = false;
+  let paused = false;
   let gameOver = false;
   let lastTime = 0;
   let score = 0;
-  let best = Number(safeStorage.getItem('samirkhan_best') || 0);
+  let best = Number(safeStorage.getItem('samirkhan_best_v2') || 0);
+  let wave = 1;
+  let combo = 0;
+  let lives = 3;
+  let invuln = 0;
   let spawnTimer = 0;
   let speechTimer = 0;
   let bgShift = 0;
+  let bossTimer = 25;
+  let bossActive = false;
+  let bossActiveTimer = 0;
+  let bannerTimer = 0;
+  let ult = 0;
+  let ultActive = 0;
+  let lastHitReason = 'кроссовок судьбы';
 
-  bestValue.textContent = String(best);
-
-  const runner = {
-    x: 220,
-    y: groundY,
-    vy: 0,
-    w: 92,
-    h: 118,
-    ducking: false,
-    duckHold: false,
-    onGround: true,
-    jumpPower: -980,
-    gravity: 2300,
-  };
-
+  const runner = {x:220,y:groundY,vy:0,w:92,h:118,ducking:false,duckHold:false,onGround:true,jumpPower:-980,gravity:2300};
   const obstacles = [];
   const particles = [];
+  const popTexts = [];
+
+  bestValue.textContent = String(best);
 
   const lowItems = [
     {emoji:'👟', name:'кроссовок позора'},
     {emoji:'🥙', name:'шаурма ярости'},
     {emoji:'🥫', name:'банка судьбы'},
     {emoji:'📦', name:'коробка мемов'},
-    {emoji:'🧃', name:'пакет странного сока'},
+    {emoji:'🧃', name:'пакет сомнений'}
   ];
-
   const highItems = [
     {emoji:'🩴', name:'тапок возмездия'},
     {emoji:'🛍️', name:'пакет осуждения'},
     {emoji:'🧻', name:'рулон паники'},
-    {emoji:'🥖', name:'летящий батон'},
-    {emoji:'📣', name:'рупор кринжа'},
+    {emoji:'🥖', name:'батон аргументов'},
+    {emoji:'📣', name:'рупор кринжа'}
+  ];
+  const dropItems = [
+    {emoji:'☕', name:'кружка драмы'},
+    {emoji:'🕸️', name:'паутина давления'},
+    {emoji:'🧠', name:'мысль сверху'},
+    {emoji:'⚡', name:'внезапный разряд'}
   ];
 
   const quotes = {
-    narrator: [
-      'Самирхан собирается. Воздух дрожит.',
-      'Легенда не спрашивает зачем. Легенда просто уворачивается.',
-      'Сейчас будет либо триумф, либо очень мемный позор.',
-      'История запомнит этот прыжок.',
+    narrator:[
+      'Самирхан пока держит линию обороны.',
+      'Это уже не бег. Это дипломатия с хаосом.',
+      'Нервы железные, колени пока тоже.',
+      'История смотрит с уважением.'
     ],
-    spider: [
-      'Паучиха: «Лови, если сможешь!»',
-      'Паучиха: «Это ещё только разминка.»',
-      'Паучиха: «Я кидаю не вещи. Я кидаю судьбу.»',
+    spider:[
+      'Паучиха: «Ну давай, увернись красиво.»',
+      'Паучиха: «Я только разогреваюсь.»',
+      'Паучиха: «Сейчас сверху прилетит сюрприз.»'
     ],
-    emil: [
-      'Эмиль: «Ну давай, чемпион.»',
-      'Эмиль: «Увернёшься — уважаю.»',
-      'Эмиль: «Сейчас полетит красиво.»',
+    emil:[
+      'Эмиль: «Уважение будет, если выживешь.»',
+      'Эмиль: «Нормально идёшь. Пока что.»',
+      'Эмиль: «Следующий бросок будет с моралью.»'
     ],
-    both: [
-      'Они оба настроены максимально несерьёзно. Это опаснее всего.',
-      'С двух сторон летит абсурд. Держись, Самирхан.',
-      'Ситуация уже вышла из-под контроля, но это даже лучше.',
+    both:[
+      'С двух сторон летит абсурд. Это уже искусство.',
+      'Паучиха и Эмиль синхронизировались. Опасно.',
+      'В воздухе пахнет босс-волной.'
+    ],
+    boss:[
+      'БОСС-ВОЛНА: общественное осуждение пошло в атаку.',
+      'БОСС-ВОЛНА: скорость стыда увеличена.',
+      'БОСС-ВОЛНА: держись, легенда.'
     ]
   };
 
   function pick(arr){ return arr[(Math.random()*arr.length)|0]; }
+  function rand(min,max){ return Math.random()*(max-min)+min; }
 
-  function setSpeech(who, text){
-    speechWho.textContent = who;
-    speechText.textContent = text;
+  function showBanner(text, ms=1600){
+    banner.textContent = text;
+    banner.classList.add('show');
+    bannerTimer = ms/1000;
   }
 
+  function setSpeech(who,text){ speechWho.textContent = who; speechText.textContent = text; }
+  function setStatus(text){ statusText.textContent = text; }
+
+  function updateHearts(){
+    heartsValue.textContent = '❤️'.repeat(Math.max(lives,0)) + '🖤'.repeat(Math.max(0,3-lives));
+  }
+  function updateUltUI(){
+    ult = Math.max(0, Math.min(100, ult));
+    ultFill.style.width = ult + '%';
+    ultHint.textContent = Math.floor(ult) + '%';
+  }
+  function saveBest(){ safeStorage.setItem('samirkhan_best_v2', String(best)); }
+
   function resetRunner(){
-    runner.y = groundY;
-    runner.vy = 0;
-    runner.onGround = true;
-    runner.ducking = false;
-    runner.duckHold = false;
+    runner.y = groundY; runner.vy = 0; runner.onGround = true; runner.ducking = false; runner.duckHold = false;
   }
 
   function resetGame(){
-    score = 0;
-    spawnTimer = 0;
-    speechTimer = 0;
-    bgShift = 0;
-    obstacles.length = 0;
-    particles.length = 0;
-    gameOver = false;
-    scoreValue.textContent = '0';
+    score = 0; wave = 1; combo = 0; lives = 3; invuln = 0; spawnTimer = 0.7; speechTimer = 1.4;
+    bgShift = 0; bossTimer = 25; bossActive = false; bossActiveTimer = 0;
+    ult = 0; ultActive = 0; bannerTimer = 0; lastHitReason = 'кроссовок судьбы';
+    obstacles.length = 0; particles.length = 0; popTexts.length = 0;
+    gameOver = false; paused = false;
+    scoreValue.textContent = '0'; waveValue.textContent = '1'; comboValue.textContent = '0';
+    updateHearts(); updateUltUI(); bossValue.textContent = 'До босса: 25с'; setStatus('Накопи 100% и жми U или кнопку ULT.');
     resetRunner();
-    setSpeech('Ведущий', 'Самирхан пошёл. Главное — не словить кринж в лицо.');
+    setSpeech('Ведущий','Самирхан вышел на линию. Главное — не ловить предметы лицом.');
   }
 
   function startGame(){
     resetGame();
-    running = true;
-    document.body.classList.remove('state-menu','state-gameover');
-    document.body.classList.add('state-playing');
-    menuPanel.style.display = 'none';
-    gameOverPanel.style.display = 'none';
+    running = true; document.body.className = 'state-playing';
+    menuPanel.style.display = 'none'; pausePanel.style.display = 'none'; gameOverPanel.style.display = 'none';
   }
-
   function openMenu(){
-    running = false;
-    gameOver = false;
-    document.body.classList.remove('state-playing','state-gameover');
-    document.body.classList.add('state-menu');
-    menuPanel.style.display = 'flex';
-    gameOverPanel.style.display = 'none';
-    setSpeech('Ведущий', 'Нажми «Старт», и Самирхан начнёт свой героический путь.');
+    running = false; paused = false; gameOver = false; document.body.className = 'state-menu';
+    menuPanel.style.display = 'flex'; pausePanel.style.display = 'none'; gameOverPanel.style.display = 'none';
+    setSpeech('Ведущий','Нажми «Старт», и Самирхан начнёт свой героический путь.');
   }
-
+  function togglePause(){
+    if(!running || gameOver) return;
+    paused = !paused;
+    pausePanel.style.display = paused ? 'flex' : 'none';
+    setSpeech('Ведущий', paused ? 'Пауза. Даже легенде нужен вдох.' : 'Назад в мясо.');
+  }
+  function getTitle(){
+    if(score >= 700) return 'Самирхан: недосягаемый';
+    if(score >= 500) return 'Самирхан: пережил обоих';
+    if(score >= 330) return 'Самирхан: железные нервы';
+    if(score >= 200) return 'Самирхан: почти легенда';
+    return 'Самирхан: путь мемного воина';
+  }
   function finishGame(){
-    running = false;
-    gameOver = true;
-    document.body.classList.remove('state-playing','state-menu');
-    document.body.classList.add('state-gameover');
-    gameOverPanel.style.display = 'flex';
-    if(score > best){
-      best = Math.floor(score);
-      safeStorage.setItem('samirkhan_best', String(best));
-      bestValue.textContent = String(best);
-    }
-    resultText.textContent = `Самирхан продержался ${Math.floor(score)} сек. Рекорд: ${best}.`;
-    setSpeech('Хроника', 'Падение было эпичным. Но кнопка «Ещё раз» уже ждёт.');
+    running = false; gameOver = true; paused = false; document.body.className = 'state-gameover';
+    pausePanel.style.display = 'none'; gameOverPanel.style.display = 'flex';
+    const finalScore = Math.floor(score);
+    if(finalScore > best){ best = finalScore; bestValue.textContent = String(best); saveBest(); }
+    resultTitle.textContent = getTitle();
+    resultText.textContent = `Счёт: ${finalScore}. Комбо: ${combo}. Последний удар: ${lastHitReason}.`;
+    resultFooter.textContent = lives <= 0 ? 'Легенда временно пала, но репутация жива.' : 'Раунд закончен.';
+    setSpeech('Хроника','Падение было эпичным. Но кнопка «Ещё раз» уже ждёт.');
   }
 
-  function jump(){
-    if(!running || gameOver) return;
-    if(runner.onGround){
-      runner.vy = runner.jumpPower;
-      runner.onGround = false;
-      runner.ducking = false;
-      burst(runner.x + 20, runner.y + 10, '#ffd34e', 8);
-    }
-  }
+  function jump(){ if(!running || paused || gameOver) return; if(runner.onGround){ runner.vy = runner.jumpPower; runner.onGround = false; runner.ducking = false; burst(runner.x+20, runner.y+10, '#ffd34e', 8);} }
+  function duck(on){ if(!running || paused || gameOver) return; runner.duckHold = on; if(runner.onGround) runner.ducking = on; }
 
-  function duck(on){
-    if(!running || gameOver) return;
-    runner.duckHold = on;
-    if(runner.onGround){
-      runner.ducking = on;
+  function useUlt(){
+    if(!running || paused || gameOver) return;
+    if(ult >= 100 && ultActive <= 0){
+      ult = 0; ultActive = 3.2; updateUltUI(); showBanner('УЛЬТА: ХАРИЗМА', 1400);
+      setStatus('На 3 секунды хаос замедлен. Живи красиво.');
+      burst(runner.x, runner.y-50, '#8cf6ff', 16);
     }
   }
 
   function burst(x,y,color,count=10){
-    for(let i=0;i<count;i++){
-      particles.push({
-        x,y,
-        vx:(Math.random()*2-1)*220,
-        vy:-Math.random()*220,
-        life:0.4+Math.random()*0.35,
-        t:0,
-        size:4+Math.random()*7,
-        color,
-      });
-    }
+    for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()*2-1)*220,vy:-Math.random()*220,life:0.4+Math.random()*0.35,t:0,size:4+Math.random()*7,color});
+  }
+  function addPop(text,x,y,color='#fff7f3'){
+    popTexts.push({text,x,y,color,t:0,life:0.9});
   }
 
-  function spawnObstacle(){
-    const speed = 530 + Math.min(score * 10, 420);
-    const thrower = gameMode === 'both' ? (Math.random() < 0.5 ? 'spider' : 'emil') : gameMode;
-    const isHigh = Math.random() < 0.38;
-    const item = pick(isHigh ? highItems : lowItems);
-    const baseY = isHigh ? groundY - 96 - Math.random()*36 : groundY - 24;
+  function baseSpeed(){ return 530 + Math.min(score*6, 300) + (bossActive ? 170 : 0); }
 
+  function makeObstacle(type, thrower, xOffset=0){
+    let item, y, w=54, h=54;
+    if(type === 'low'){
+      item = pick(lowItems); y = groundY - 24;
+    } else if(type === 'high'){
+      item = pick(highItems); y = groundY - 120 - rand(0, 18);
+    } else {
+      item = pick(dropItems); y = groundY - 240 - rand(0, 40);
+    }
     obstacles.push({
-      x: W + 70,
-      y: baseY,
-      w: isHigh ? 56 : 50,
-      h: isHigh ? 56 : 50,
-      speed,
-      emoji: item.emoji,
-      label: item.name,
-      high: isHigh,
+      x: W + 70 + xOffset,
+      y,
+      baseY:y,
+      w,h,
+      speed:baseSpeed(),
+      emoji:item.emoji,
+      label:item.name,
       thrower,
-      rot: (Math.random()*0.6 - 0.3),
-      spin: (Math.random()*2 - 1) * 3.4,
-      bob: Math.random()*Math.PI*2,
+      kind:type,
+      rot:rand(-0.3,0.3),
+      spin:rand(-3.4,3.4),
+      bob:rand(0, Math.PI*2),
+      vy:type === 'drop' ? 0 : 0,
+      gravity:type === 'drop' ? 850 : 0,
+      scored:false,
     });
+  }
 
-    const who = thrower === 'spider' ? 'Паучиха' : 'Эмиль';
-    if(Math.random() < 0.28){
-      setSpeech(who, `${who} кидает: ${item.name}.`);
+  function spawnPattern(){
+    const thrower = gameMode === 'both' ? (Math.random() < 0.5 ? 'spider' : 'emil') : gameMode;
+    const roll = Math.random();
+    if(roll < 0.32) makeObstacle('low', thrower);
+    else if(roll < 0.56) makeObstacle('high', thrower);
+    else if(roll < 0.77) makeObstacle('drop', thrower);
+    else {
+      makeObstacle(Math.random() < 0.5 ? 'low' : 'high', thrower);
+      makeObstacle(Math.random() < 0.5 ? 'high' : 'low', thrower, 150 + Math.random()*45);
+      setSpeech('Хаос','ДВОЙНОЙ МЕМ ВХОДИТ В ЧАТ.');
     }
   }
 
-  function overlap(a,b){
-    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  function playerBox(){
+    const rh = runner.ducking && runner.onGround ? runner.h * 0.62 : runner.h;
+    const ry = runner.ducking && runner.onGround ? runner.y + runner.h - rh : runner.y - rh;
+    return {x:runner.x - 24, y:ry, w:runner.w - 6, h:rh};
+  }
+  function overlap(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+  function hitPlayer(reason){
+    if(invuln > 0) return;
+    lives -= 1; invuln = 1.25; combo = 0; comboValue.textContent = '0'; lastHitReason = reason; updateHearts();
+    burst(runner.x+40, runner.y-40, '#ff8a8a', 18);
+    addPop('-1 жизнь', runner.x+10, runner.y-110, '#ff8a8a');
+    setStatus(`Попадание: ${reason}. Соберись.`);
+    setSpeech('Хроника', `Самирхан словил ${reason}. Но бой ещё не закончен.`);
+    if(lives <= 0) finishGame();
   }
 
-  function update(dt){
-    bgShift += dt * 90;
+  function rewardDodge(o){
+    if(o.scored) return;
+    o.scored = true;
+    combo += 1;
+    comboValue.textContent = String(combo);
+    score += 12;
+    ult += 8 + Math.min(combo, 6);
+    updateUltUI();
+    if(combo === 5) { addPop('НА СТИЛЕ', runner.x+70, runner.y-150, '#92ffb0'); setSpeech('Ведущий','Пять идеальных уклонений. Уже красиво.'); }
+    if(combo === 10){ showBanner('НЕПРИКАСАЕМЫЙ', 1200); }
+    if(combo === 15){ showBanner('ВНЕ ЗАКОНА ФИЗИКИ', 1200); }
+    if(ult >= 100) setStatus('Ульта заряжена. Жми ULT.');
+  }
 
-    if(running){
-      score += dt * 10;
-      scoreValue.textContent = String(Math.floor(score));
+  function update(dtRaw){
+    const timeScale = ultActive > 0 ? 0.42 : 1;
+    const dt = dtRaw * timeScale;
 
-      spawnTimer -= dt;
-      speechTimer -= dt;
+    if(bannerTimer > 0){ bannerTimer -= dtRaw; if(bannerTimer <= 0) banner.classList.remove('show'); }
+    bgShift += dt * (90 + wave*4);
+    if(invuln > 0) invuln -= dtRaw;
+    if(ultActive > 0){ ultActive -= dtRaw; if(ultActive <= 0) setStatus('Ульта закончилась. Копи заново.'); }
+    if(paused || !running) {
+      updateParticles(dtRaw, false);
+      return;
+    }
 
-      if(spawnTimer <= 0){
-        spawnObstacle();
-        const difficulty = Math.max(0.38, 1.08 - score * 0.012);
-        spawnTimer = difficulty + Math.random()*0.38;
+    score += dt * 10;
+    scoreValue.textContent = String(Math.floor(score));
+    if(score > best){ bestValue.textContent = String(Math.floor(score)); }
+
+    if(!bossActive){
+      bossTimer -= dtRaw;
+      bossValue.textContent = 'До босса: ' + Math.max(0, Math.ceil(bossTimer)) + 'с';
+      if(bossTimer <= 0){
+        bossActive = true; bossActiveTimer = 8; wave += 1; waveValue.textContent = String(wave);
+        showBanner('БОСС-ВОЛНА', 1600);
+        setSpeech('Хаос', pick(quotes.boss));
+        bossValue.textContent = 'БОСС-ВОЛНА';
       }
-
-      if(speechTimer <= 0){
-        const group = gameMode === 'both' ? 'both' : gameMode;
-        if(Math.random() < 0.6) setSpeech('Ведущий', pick(quotes.narrator));
-        else setSpeech(group === 'spider' ? 'Паучиха' : group === 'emil' ? 'Эмиль' : 'Хаос', pick(quotes[group]));
-        speechTimer = 2.2 + Math.random()*1.8;
-      }
-
-      runner.vy += runner.gravity * dt;
-      runner.y += runner.vy * dt;
-      if(runner.y >= groundY){
-        runner.y = groundY;
-        runner.vy = 0;
-        runner.onGround = true;
-        runner.ducking = runner.duckHold;
-      }
-
-      for(let i=obstacles.length-1;i>=0;i--){
-        const o = obstacles[i];
-        o.x -= o.speed * dt;
-        o.rot += o.spin * dt;
-        o.bob += dt * 4;
-
-        const rh = runner.ducking && runner.onGround ? runner.h * 0.62 : runner.h;
-        const ry = runner.ducking && runner.onGround ? runner.y + runner.h - rh : runner.y - rh;
-        const rbox = {x: runner.x - 24, y: ry, w: runner.w - 6, h: rh};
-        const obox = {x: o.x - o.w/2 + 6, y: o.y - o.h/2 + 6, w: o.w - 12, h: o.h - 12};
-
-        if(overlap(rbox, obox)){
-          burst(runner.x+40, ry+30, '#ff8a8a', 18);
-          finishGame();
-          break;
-        }
-
-        if(o.x < -120) obstacles.splice(i,1);
+    } else {
+      bossActiveTimer -= dtRaw;
+      bossValue.textContent = 'Босс: ' + Math.max(0, bossActiveTimer).toFixed(1) + 'с';
+      if(bossActiveTimer <= 0){
+        bossActive = false; bossTimer = 25;
+        bossValue.textContent = 'До босса: 25с';
+        setSpeech('Ведущий','Босс-волна пережита. Но расслабляться рано.');
       }
     }
 
+    spawnTimer -= dt;
+    speechTimer -= dtRaw;
+    if(spawnTimer <= 0){
+      spawnPattern();
+      const base = bossActive ? 0.36 : 0.62;
+      spawnTimer = Math.max(0.25, base - score * 0.00055) + Math.random() * (bossActive ? 0.18 : 0.26);
+    }
+    if(speechTimer <= 0){
+      const pool = bossActive ? 'boss' : (gameMode === 'both' ? 'both' : gameMode);
+      const speaker = bossActive ? 'Хаос' : pool === 'spider' ? 'Паучиха' : pool === 'emil' ? 'Эмиль' : 'Ведущий';
+      setSpeech(speaker, pick(quotes[pool] || quotes.narrator));
+      speechTimer = 2.1 + Math.random() * 1.8;
+    }
+
+    runner.vy += runner.gravity * dt;
+    runner.y += runner.vy * dt;
+    if(runner.y >= groundY){ runner.y = groundY; runner.vy = 0; runner.onGround = true; runner.ducking = runner.duckHold; }
+
+    const rbox = playerBox();
+    for(let i = obstacles.length - 1; i >= 0; i--){
+      const o = obstacles[i];
+      o.x -= o.speed * dt;
+      o.rot += o.spin * dt;
+      o.bob += dt * 4;
+      if(o.kind === 'drop'){
+        o.vy += o.gravity * dt;
+        o.y += o.vy * dt;
+        if(o.y > groundY - 28) o.y = groundY - 28;
+      }
+
+      const obox = {x:o.x - o.w/2 + 6, y:o.y - o.h/2 + 6, w:o.w - 12, h:o.h - 12};
+      if(overlap(rbox, obox)) hitPlayer(o.label);
+
+      if(!o.scored && o.x < runner.x - 70) rewardDodge(o);
+      if(o.x < -120) obstacles.splice(i,1);
+    }
+
+    updateParticles(dtRaw, true);
+  }
+
+  function updateParticles(dt, moveText){
     for(let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.t += dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vy += 760 * dt;
-      if(p.t >= p.life) particles.splice(i,1);
+      const p = particles[i]; p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 760 * dt; if(p.t >= p.life) particles.splice(i,1);
+    }
+    for(let i=popTexts.length-1;i>=0;i--){
+      const p = popTexts[i]; if(moveText){ p.t += dt; p.y -= 36 * dt; } if(p.t >= p.life) popTexts.splice(i,1);
     }
   }
 
   function drawBackground(){
     const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,'#21112a');
-    g.addColorStop(0.55,'#120f1c');
-    g.addColorStop(1,'#0f131b');
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
+    g.addColorStop(0, bossActive ? '#391128' : '#21112a');
+    g.addColorStop(0.55, bossActive ? '#1c0a15' : '#120f1c');
+    g.addColorStop(1, '#0f131b');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
     for(let i=0;i<7;i++){
-      const x = (i*240 - (bgShift*0.25)%260);
-      ctx.fillStyle = i%2 ? 'rgba(140,246,255,0.06)' : 'rgba(255,111,169,0.06)';
+      const x = i*240 - (bgShift*0.25)%260;
+      ctx.fillStyle = i%2 ? 'rgba(140,246,255,0.06)' : (bossActive ? 'rgba(255,80,140,0.10)' : 'rgba(255,111,169,0.06)');
       ctx.fillRect(x, 0, 110, H);
     }
-
     ctx.fillStyle = 'rgba(255,255,255,0.06)';
     for(let i=0;i<20;i++){
-      ctx.beginPath();
       const x = (i*130 + (bgShift*0.5)) % (W+200) - 100;
       const y = 80 + (i%5)*85 + Math.sin(i+bgShift*0.01)*16;
-      ctx.arc(x,y,2+(i%3),0,Math.PI*2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,2+(i%3),0,Math.PI*2); ctx.fill();
     }
-
-    ctx.fillStyle = '#1d2630';
-    ctx.fillRect(0, groundY + 36, W, H-groundY);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.09)';
-    ctx.lineWidth = 2;
+    ctx.fillStyle = '#1d2630'; ctx.fillRect(0, groundY + 36, W, H-groundY);
+    ctx.strokeStyle = bossActive ? 'rgba(255,92,149,0.2)' : 'rgba(255,255,255,0.09)'; ctx.lineWidth = 2;
     for(let i=-1;i<8;i++){
-      const x = (i*220 - (bgShift*0.9)%220);
-      ctx.beginPath();
-      ctx.moveTo(x, groundY + 38);
-      ctx.lineTo(x+120, groundY + 38);
-      ctx.stroke();
+      const x = i*220 - (bgShift*0.9)%220; ctx.beginPath(); ctx.moveTo(x, groundY + 38); ctx.lineTo(x+120, groundY + 38); ctx.stroke();
     }
-  }
-
-  function drawThrowerSide(){
-    ctx.save();
-    ctx.globalAlpha = 0.95;
-
-    const leftLabel = gameMode === 'emil' ? 'Эмиль' : 'Паучиха';
-    const rightLabel = gameMode === 'spider' ? 'Паучиха' : 'Эмиль';
-
-    drawThrower(120, groundY - 20, leftLabel, leftLabel === 'Паучиха' ? '#ff6fa9' : '#8cf6ff', true);
-    if(gameMode === 'both'){
-      drawThrower(W-120, groundY - 20, rightLabel, rightLabel === 'Паучиха' ? '#ff6fa9' : '#8cf6ff', false);
-    }
-
-    ctx.restore();
   }
 
   function drawThrower(x,y,label,color,left){
-    ctx.save();
-    ctx.translate(x,y);
-    if(!left) ctx.scale(-1,1);
-
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(0,-72,26,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(255,255,255,0.13)';
-    ctx.fillRect(-22,-44,44,70);
-    ctx.fillStyle = 'rgba(255,255,255,0.18)';
-    ctx.fillRect(-40,-32,20,10);
-    ctx.fillRect(20,-32,20,10);
-
-    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.font = 'bold 22px Inter, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, 0, 54);
+    ctx.save(); ctx.translate(x,y); if(!left) ctx.scale(-1,1);
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(0,-72,26,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.13)'; ctx.fillRect(-22,-44,44,70);
+    ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(-40,-32,20,10); ctx.fillRect(20,-32,20,10);
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.font = 'bold 22px Inter, Arial'; ctx.textAlign = 'center'; ctx.fillText(label, 0, 54);
     ctx.restore();
+  }
+
+  function drawThrowers(){
+    if(gameMode === 'spider') drawThrower(120, groundY - 20, 'Паучиха', '#ff6fa9', true);
+    else if(gameMode === 'emil') drawThrower(120, groundY - 20, 'Эмиль', '#8cf6ff', true);
+    else { drawThrower(120, groundY - 20, 'Паучиха', '#ff6fa9', true); drawThrower(W-120, groundY - 20, 'Эмиль', '#8cf6ff', false); }
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
   }
 
   function drawRunner(){
     const duckScale = runner.ducking && runner.onGround ? 0.63 : 1;
-    const h = runner.h * duckScale;
-    const topY = runner.y - h;
-
-    ctx.save();
-    ctx.translate(runner.x, topY);
-
-    ctx.fillStyle = '#101720';
-    roundRect(-26, 28, 54, h-30, 18);
-    ctx.fill();
-
-    ctx.fillStyle = '#ffd34e';
-    roundRect(-30, h-20, 24, 14, 8);
-    roundRect(6, h-20, 24, 14, 8);
-    ctx.fill();
-
-    ctx.fillStyle = '#f08b4b';
-    ctx.beginPath();
-    ctx.arc(0, 14, 30, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle = '#1c0e0a';
-    ctx.beginPath();
-    ctx.arc(-10, 8, 5, 0, Math.PI*2);
-    ctx.arc(10, 8, 5, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#1c0e0a';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(0, 20, 12, 0.15*Math.PI, 0.85*Math.PI);
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 22px Inter, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('S', 0, h*0.58);
-
-    if(!runner.onGround){
-      ctx.fillStyle = 'rgba(255,211,78,.2)';
-      ctx.beginPath();
-      ctx.arc(0,h+12,26,0,Math.PI*2);
-      ctx.fill();
-    }
-
+    const h = runner.h * duckScale; const topY = runner.y - h;
+    ctx.save(); ctx.translate(runner.x, topY);
+    if(invuln > 0 && Math.floor(invuln*10)%2===0) ctx.globalAlpha = 0.45;
+    if(ultActive > 0){ ctx.shadowColor = '#8cf6ff'; ctx.shadowBlur = 28; }
+    ctx.fillStyle = '#101720'; roundRect(-26, 28, 54, h-30, 18); ctx.fill();
+    ctx.fillStyle = '#ffd34e'; roundRect(-30, h-20, 24, 14, 8); roundRect(6, h-20, 24, 14, 8); ctx.fill();
+    ctx.fillStyle = '#f08b4b'; ctx.beginPath(); ctx.arc(0, 14, 30, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1c0e0a'; ctx.beginPath(); ctx.arc(-10,8,5,0,Math.PI*2); ctx.arc(10,8,5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#1c0e0a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0,20,12,0.15*Math.PI,0.85*Math.PI); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 22px Inter, Arial'; ctx.textAlign = 'center'; ctx.fillText('S', 0, h*0.58);
     ctx.restore();
   }
 
   function drawObstacles(){
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for(const o of obstacles){
-      ctx.save();
-      ctx.translate(o.x, o.y + Math.sin(o.bob)*4);
-      ctx.rotate(o.rot);
-      ctx.font = `${o.high ? 48 : 44}px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
-      ctx.fillText(o.emoji, 0, 0);
-      ctx.restore();
+      ctx.save(); ctx.translate(o.x, o.y + Math.sin(o.bob)*4); ctx.rotate(o.rot);
+      ctx.font = `${o.kind === 'drop' ? 50 : 46}px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
+      ctx.fillText(o.emoji, 0, 0); ctx.restore();
     }
   }
 
   function drawParticles(){
-    for(const p of particles){
-      const a = 1 - p.t/p.life;
-      ctx.globalAlpha = a;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);
-      ctx.fill();
-    }
+    for(const p of particles){ const a = 1 - p.t/p.life; ctx.globalAlpha = a; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    ctx.font = 'bold 24px Inter, Arial'; ctx.textAlign = 'center';
+    for(const p of popTexts){ const a = 1 - p.t/p.life; ctx.globalAlpha = a; ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y); }
     ctx.globalAlpha = 1;
   }
 
-  function roundRect(x,y,w,h,r){
-    ctx.beginPath();
-    ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y,x+w,y+h,r);
-    ctx.arcTo(x+w,y+h,x,y+h,r);
-    ctx.arcTo(x,y+h,x,y,r);
-    ctx.arcTo(x,y,x+w,y,r);
-    ctx.closePath();
-  }
-
   function render(){
-    drawBackground();
-    drawThrowerSide();
-
-    ctx.strokeStyle = 'rgba(255,255,255,.14)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, groundY + 20);
-    ctx.lineTo(W, groundY + 20);
-    ctx.stroke();
-
-    drawRunner();
-    drawObstacles();
-    drawParticles();
-
-    if(!running && !gameOver){
-      ctx.fillStyle = 'rgba(255,255,255,0.1)';
-      ctx.font = 'bold 52px Inter, Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('ГОТОВ К ХАОСУ', W/2, H*0.28);
-    }
+    drawBackground(); drawThrowers();
+    ctx.strokeStyle = bossActive ? 'rgba(255,92,149,.28)' : 'rgba(255,255,255,.14)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, groundY + 20); ctx.lineTo(W, groundY + 20); ctx.stroke();
+    drawRunner(); drawObstacles(); drawParticles();
+    if(paused){ ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(0,0,W,H); }
   }
 
   function loop(ts){
     if(!lastTime) lastTime = ts;
-    const dt = Math.min(0.033, (ts - lastTime)/1000);
-    lastTime = ts;
-    update(dt);
-    render();
-    requestAnimationFrame(loop);
+    const dt = Math.min(0.033, (ts-lastTime)/1000); lastTime = ts;
+    update(dt); render(); requestAnimationFrame(loop);
   }
 
   function chooseMode(mode){
@@ -726,15 +667,8 @@
   }
 
   function bindTapPress(button, onDown, onUp){
-    const down = (e) => {
-      e.preventDefault();
-      onDown();
-    };
-    const up = (e) => {
-      e.preventDefault();
-      if(onUp) onUp();
-    };
-
+    const down = (e) => { e.preventDefault(); onDown(); };
+    const up = (e) => { e.preventDefault(); if(onUp) onUp(); };
     button.addEventListener('touchstart', down, {passive:false});
     button.addEventListener('touchend', up, {passive:false});
     button.addEventListener('touchcancel', up, {passive:false});
@@ -749,71 +683,36 @@
 
   modeButtons.forEach(btn => {
     btn.addEventListener('click', () => chooseMode(btn.dataset.mode));
-    btn.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      chooseMode(btn.dataset.mode);
-    }, {passive:false});
+    btn.addEventListener('touchstart', (e) => { e.preventDefault(); chooseMode(btn.dataset.mode); }, {passive:false});
   });
 
   startBtn.addEventListener('click', startGame);
-  startBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startGame();
-  }, {passive:false});
-
+  startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, {passive:false});
   restartBtn.addEventListener('click', startGame);
-  restartBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startGame();
-  }, {passive:false});
-
+  restartBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, {passive:false});
   menuBtn.addEventListener('click', openMenu);
-  menuBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    openMenu();
-  }, {passive:false});
+  menuBtn.addEventListener('touchstart', (e) => { e.preventDefault(); openMenu(); }, {passive:false});
+  pauseMenuBtn.addEventListener('click', openMenu);
+  pauseMenuBtn.addEventListener('touchstart', (e) => { e.preventDefault(); openMenu(); }, {passive:false});
+  resumeBtn.addEventListener('click', togglePause);
+  resumeBtn.addEventListener('touchstart', (e) => { e.preventDefault(); togglePause(); }, {passive:false});
 
   bindTapPress(jumpBtn, jump, null);
   bindTapPress(duckBtn, () => duck(true), () => duck(false));
+  bindTapPress(ultBtn, useUlt, null);
 
   window.addEventListener('keydown', (e) => {
-    if(e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW'){
-      e.preventDefault();
-      if(!running && !gameOver){
-        startGame();
-      } else {
-        jump();
-      }
-    }
-    if(e.code === 'ArrowDown' || e.code === 'KeyS'){
-      e.preventDefault();
-      duck(true);
-    }
-    if(e.code === 'Enter' && gameOver){
-      startGame();
-    }
+    if(e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW'){ e.preventDefault(); if(!running && !gameOver) startGame(); else jump(); }
+    if(e.code === 'ArrowDown' || e.code === 'KeyS'){ e.preventDefault(); duck(true); }
+    if(e.code === 'KeyU'){ e.preventDefault(); useUlt(); }
+    if(e.code === 'KeyP'){ e.preventDefault(); togglePause(); }
+    if(e.code === 'Enter' && gameOver){ startGame(); }
   }, {passive:false});
+  window.addEventListener('keyup', (e) => { if(e.code === 'ArrowDown' || e.code === 'KeyS') duck(false); });
+  canvas.addEventListener('click', () => { if(!running && !gameOver) startGame(); else jump(); });
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(!running && !gameOver) startGame(); else jump(); }, {passive:false});
 
-  window.addEventListener('keyup', (e) => {
-    if(e.code === 'ArrowDown' || e.code === 'KeyS'){
-      duck(false);
-    }
-  });
-
-  canvas.addEventListener('click', () => {
-    if(!running && !gameOver) startGame();
-    else jump();
-  });
-
-  canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if(!running && !gameOver) startGame();
-    else jump();
-  }, {passive:false});
-
-  chooseMode('both');
-  openMenu();
-  requestAnimationFrame(loop);
+  chooseMode('both'); openMenu(); updateHearts(); updateUltUI(); requestAnimationFrame(loop);
 })();
 </script>
 </body>
