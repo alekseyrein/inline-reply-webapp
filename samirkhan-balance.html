@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Самирхан: Уворот века — balance patch</title>
+  <style>
+    html,body{margin:0;height:100%;background:#120f1c;color:#fff;font-family:Inter,Arial,sans-serif}
+    .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:linear-gradient(180deg,#2b1231,#171322);padding:24px;text-align:center}
+    .spinner{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.18);border-top-color:#8cf6ff;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    iframe{display:none;width:100%;height:100%;border:0;background:#120f1c}
+    .small{opacity:.8;font-size:14px}
+    a{color:#8cf6ff}
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div><b>Применяю balance patch…</b></div>
+    <div class="small">Мягче старт, длиннее неуязвимость, быстрее заряд ульты и двойные атаки позже.</div>
+  </div>
+  <iframe id="gameFrame" title="Samirkhan Meme Game Balanced"></iframe>
+  <script>
+    const loading = document.getElementById('loading');
+    const frame = document.getElementById('gameFrame');
+
+    async function loadPatchedGame(){
+      try {
+        const res = await fetch('./samirkhan-memegame.html', {cache: 'no-store'});
+        let html = await res.text();
+
+        html = html
+          .replace("<div class=\"small\" id=\"bossValue\">До босса: 25с</div>", "<div class=\"small\" id=\"bossValue\">До босса: 30с</div>")
+          .replace("Теперь Самирхан не просто прыгает. У него 3 жизни, комбо за стиль, босс-волны каждые 25 секунд и ульта «Харизма», которая замедляет хаос.", "Теперь Самирхан не просто прыгает. У него 3 жизни, комбо за стиль, более мягкий старт, а первая босс-волна приходит чуть позже — ульта «Харизма» тоже заряжается быстрее.")
+          .replace("score = 0; wave = 1; combo = 0; lives = 3; invuln = 0; spawnTimer = 0.7; speechTimer = 1.4;", "score = 0; wave = 1; combo = 0; lives = 3; invuln = 0; spawnTimer = 1.15; speechTimer = 1.4;")
+          .replace("bgShift = 0; bossTimer = 25; bossActive = false; bossActiveTimer = 0;", "bgShift = 0; bossTimer = 30; bossActive = false; bossActiveTimer = 0;")
+          .replace("updateHearts(); updateUltUI(); bossValue.textContent = 'До босса: 25с'; setStatus('Накопи 100% и жми U или кнопку ULT.');", "updateHearts(); updateUltUI(); bossValue.textContent = 'До босса: 30с'; setStatus('Накопи 100% и жми U или кнопку ULT.');")
+          .replace("lives -= 1; invuln = 1.25; combo = 0; comboValue.textContent = '0'; lastHitReason = reason; updateHearts();", "lives -= 1; invuln = 1.6; combo = 0; comboValue.textContent = '0'; lastHitReason = reason; updateHearts();")
+          .replace("ult += 8 + Math.min(combo, 6);", "ult += 12 + Math.min(combo, 8);")
+          .replace("function baseSpeed(){ return 530 + Math.min(score*6, 300) + (bossActive ? 170 : 0); }", `function baseSpeed(){
+    const earlyEase = Math.min(score / 140, 1);
+    return 420 + earlyEase * 110 + Math.min(score * 5.2, 280) + (bossActive ? 150 : 0);
+  }`)
+          .replace(`function spawnPattern(){
+    const thrower = gameMode === 'both' ? (Math.random() < 0.5 ? 'spider' : 'emil') : gameMode;
+    const roll = Math.random();
+    if(roll < 0.32) makeObstacle('low', thrower);
+    else if(roll < 0.56) makeObstacle('high', thrower);
+    else if(roll < 0.77) makeObstacle('drop', thrower);
+    else {
+      makeObstacle(Math.random() < 0.5 ? 'low' : 'high', thrower);
+      makeObstacle(Math.random() < 0.5 ? 'high' : 'low', thrower, 150 + Math.random()*45);
+      setSpeech('Хаос','ДВОЙНОЙ МЕМ ВХОДИТ В ЧАТ.');
+    }
+  }`, `function spawnPattern(){
+    const thrower = gameMode === 'both' ? (Math.random() < 0.5 ? 'spider' : 'emil') : gameMode;
+    const roll = Math.random();
+
+    if(score < 90){
+      if(roll < 0.62) makeObstacle('low', thrower);
+      else makeObstacle('high', thrower);
+      return;
+    }
+
+    if(score < 200){
+      if(roll < 0.40) makeObstacle('low', thrower);
+      else if(roll < 0.78) makeObstacle('high', thrower);
+      else makeObstacle('drop', thrower);
+      return;
+    }
+
+    if(roll < 0.32) makeObstacle('low', thrower);
+    else if(roll < 0.56) makeObstacle('high', thrower);
+    else if(roll < 0.77) makeObstacle('drop', thrower);
+    else {
+      makeObstacle(Math.random() < 0.5 ? 'low' : 'high', thrower);
+      makeObstacle(Math.random() < 0.5 ? 'high' : 'low', thrower, 150 + Math.random()*45);
+      setSpeech('Хаос','ДВОЙНОЙ МЕМ ВХОДИТ В ЧАТ.');
+    }
+  }`)
+          .replace("score += dt * 10;\n    scoreValue.textContent = String(Math.floor(score));", "score += dt * 10;\n    ult += dtRaw * 1.6;\n    updateUltUI();\n    scoreValue.textContent = String(Math.floor(score));")
+          .replace("const base = bossActive ? 0.36 : 0.62;\n      spawnTimer = Math.max(0.25, base - score * 0.00055) + Math.random() * (bossActive ? 0.18 : 0.26);", `let base;
+      if(bossActive){
+        base = 0.44;
+      } else if(score < 120){
+        base = 1.02 - score * 0.0018;
+      } else if(score < 240){
+        base = 0.82 - (score - 120) * 0.0011;
+      } else {
+        base = 0.62 - (score - 240) * 0.00045;
+      }
+      spawnTimer = Math.max(0.30, base) + Math.random() * (bossActive ? 0.16 : 0.24);
+`) ;
+
+        frame.srcdoc = html;
+        frame.style.display = 'block';
+        loading.style.display = 'none';
+      } catch (err) {
+        loading.innerHTML = '<div><b>Не удалось применить patch.</b></div><div class="small">Открой <a href="./samirkhan-memegame.html">оригинальную версию</a>.</div>';
+        console.error(err);
+      }
+    }
+    loadPatchedGame();
+  </script>
+</body>
+</html>
