@@ -2,13 +2,94 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Самирхан: Уворот века</title>
-  <meta http-equiv="refresh" content="0; url=./samirkhan-balance.html" />
-  <script>window.location.replace('./samirkhan-balance.html');</script>
-  <style>body{font-family:Arial,sans-serif;background:#111;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}a{color:#8cf6ff}</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Мемные игры — Aleksey Rein</title>
+  <style>
+    :root{
+      --bg1:#0b0811;
+      --bg2:#1f1430;
+      --panel:rgba(19,16,29,.9);
+      --line:rgba(255,255,255,.08);
+      --text:#f6f3ff;
+      --muted:#bdb4d2;
+      --pink:#ff54d6;
+      --violet:#8f57ff;
+      --cyan:#77dfff;
+      --gold:#f2cf77;
+      --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#2d1a42 0%,#110d19 52%,#07050a 100%);color:var(--text)}
+    body{padding:calc(18px + var(--safe-top)) 14px calc(18px + var(--safe-bottom));display:flex;justify-content:center}
+    .app{width:min(100%,760px)}
+    .hero{padding:22px 18px;border-radius:28px;background:linear-gradient(180deg,rgba(28,22,43,.96),rgba(14,11,21,.96));border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+    h1{margin:16px 0 8px;font-size:clamp(30px,7vw,52px);line-height:.95;letter-spacing:-.03em}
+    .sub{margin:0;color:var(--muted);font-size:15px;line-height:1.45;max-width:640px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+    .card{position:relative;display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:24px;background:linear-gradient(180deg,rgba(23,19,35,.96),rgba(11,9,18,.96));border:1px solid var(--line);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+    .card.featured{outline:1px solid rgba(255,84,214,.35);box-shadow:0 18px 40px rgba(143,87,255,.16)}
+    .tag{align-self:flex-start;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05);color:var(--muted)}
+    .tag.new{background:linear-gradient(135deg,rgba(255,84,214,.18),rgba(143,87,255,.18));color:#ffd5f7;border-color:rgba(255,84,214,.24)}
+    .game-title{font-size:28px;font-weight:900;line-height:1.02}
+    .game-desc{color:var(--muted);font-size:14px;line-height:1.42;min-height:58px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{padding:7px 10px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:var(--muted)}
+    .actions{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
+    .btn{appearance:none;border:0;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 16px;border-radius:16px;font-weight:900;transition:transform .12s ease,opacity .12s ease,box-shadow .12s ease}
+    .btn:active{transform:scale(.98)}
+    .btn.primary{background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff;box-shadow:0 12px 28px rgba(143,87,255,.28)}
+    .btn.secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--text)}
+    .footer{margin-top:14px;padding:14px 16px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:13px;line-height:1.45}
+    .accent{color:var(--gold);font-weight:800}
+    @media (max-width:680px){.grid{grid-template-columns:1fr}.game-desc{min-height:0}}
+  </style>
 </head>
 <body>
-  <p>Переход к игре… Если не открылось автоматически, нажми <a href="./samirkhan-balance.html">сюда</a>.</p>
+  <main class="app">
+    <section class="hero">
+      <div class="eyebrow">🎮 Мемные браузерные игры</div>
+      <h1>Выбери,<br/>что разносить</h1>
+      <p class="sub">Небольшой игровой хаб с двумя браузерными мем-играми. Всё открывается прямо с телефона, без установки и без лишних экранов.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="tag">Аркада</div>
+        <div class="game-title">Самирхан:<br/>Уворот века</div>
+        <div class="game-desc">Реакция, уклонения и мемный хаос. Версия с balance patch: мягче старт, длиннее окно ошибки и комфортнее темп на телефоне.</div>
+        <div class="chips">
+          <div class="chip">Уклонение</div>
+          <div class="chip">Быстрые катки</div>
+          <div class="chip">Мобильный формат</div>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="./samirkhan-balance.html">Играть</a>
+          <a class="btn secondary" href="./samirkhan-memegame.html">Оригинал</a>
+        </div>
+      </article>
+
+      <article class="card featured">
+        <div class="tag new">Новое</div>
+        <div class="game-title">Разнос<br/>состава</div>
+        <div class="game-desc">Match-3 про Самирхана, Блэкнастю, Розу Ксю и Вову Дискотеку против Эмиля, Паучихи и Батенина. Паутина, спецкомбо и босс-давление сверху.</div>
+        <div class="chips">
+          <div class="chip">3 в ряд</div>
+          <div class="chip">6 уровней MVP</div>
+          <div class="chip">Эмиль / Паучиха / Батенин</div>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="./raznos-sostava.html">Играть</a>
+          <a class="btn secondary" href="https://github.com/alekseyrein/inline-reply-webapp/blob/main/raznos-sostava.html">Код</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="footer">
+      <span class="accent">Сейчас это уже удобнее:</span> корневая страница репозитория больше не перекидывает автоматически в старую игру, а показывает обе игры как отдельные карточки.
+    </section>
+  </main>
 </body>
 </html>
