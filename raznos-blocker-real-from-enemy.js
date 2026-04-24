@@ -1,6 +1,6 @@
 (()=>{
 let ART=null,loading=null;
-const LABEL={emil:'Э',report:'Отчёт',web:'',spider_woman:'',batenin:'',black_list:'Блок'};
+const LABEL={emil:'Э',report:'Отчёт',web:'',spider_woman:'',batenin:'',black_list:'Блок',block:'Блок'};
 function st(){if(document.getElementById('rz-real-blocker-style'))return;const s=document.createElement('style');s.id='rz-real-blocker-style';s.textContent=`
 #board .rz-real-art{position:absolute!important;overflow:hidden!important;background:transparent!important;background-image:none!important;border:0!important;outline:none!important;box-shadow:none!important;transform:translateZ(0)!important;backface-visibility:hidden!important;contain:paint!important}
 #board .rz-real-art::before,#board .rz-real-art::after{display:none!important;content:none!important}
@@ -10,12 +10,28 @@ function st(){if(document.getElementById('rz-real-blocker-style'))return;const s
 #board .rz-real-art .rz-badge{position:absolute!important;right:4px!important;bottom:4px!important;z-index:5!important;margin:0!important;padding:2px 5px!important;border-radius:999px!important;background:rgba(8,8,12,.68)!important;border:1px solid rgba(255,255,255,.16)!important;font-size:10px!important;line-height:1!important;color:#fff!important;text-shadow:none!important;box-shadow:0 4px 10px rgba(0,0,0,.24)!important;font-weight:800!important;letter-spacing:0!important}
 .goal-chip.rz-real-goal .goal-icon{font-size:0!important;color:transparent!important;background:transparent!important;background-image:none!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 4px 12px rgba(0,0,0,.28)!important}
 .goal-chip.rz-real-goal .goal-icon img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}`;document.head.appendChild(s)}
-async function loadArt(){if(ART)return ART;if(loading)return loading;loading=fetch('./raznos-enemy-icons.js?v=real-art-20260425',{cache:'no-store'}).then(r=>r.text()).then(txt=>{const m=txt.match(/const\s+A\s*=\s*(\{[\s\S]*?\});\s*function\s+style/);if(!m)throw new Error('enemy art map not found');ART=JSON.parse(m[1]);ART.block=ART.black_list;return ART;}).catch(e=>{console.error('rz art load failed',e);ART={};return ART});return loading}
+function extractA(txt){
+  const p=txt.indexOf('const A=');
+  if(p<0) throw new Error('const A not found');
+  let i=txt.indexOf('{',p), start=i, depth=0, q='', esc=false;
+  for(;i<txt.length;i++){
+    const c=txt[i];
+    if(q){ if(esc){esc=false;continue} if(c==='\\'){esc=true;continue} if(c===q)q=''; continue; }
+    if(c==='"'||c==="'"){q=c;continue}
+    if(c==='{')depth++;
+    if(c==='}'){
+      depth--;
+      if(depth===0) return txt.slice(start,i+1);
+    }
+  }
+  throw new Error('A map parse failed');
+}
+async function loadArt(){if(ART)return ART;if(loading)return loading;loading=fetch('./raznos-enemy-icons.js?v=real-art-20260425-0225',{cache:'no-store'}).then(r=>r.text()).then(txt=>{const obj=extractA(txt);ART=(new Function('return ('+obj+')'))();ART.block=ART.black_list;return ART;}).catch(e=>{console.error('rz art load failed',e);ART={};return ART});return loading}
 function norm(x){return String(x||'').toLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ').trim()}
 function textOf(el){const a=[];['.rz-badge','.tile-short','.tile-name','.blocker-short','.blocker-name'].forEach(s=>{const n=el.querySelector(s);if(n)a.push(n.textContent||'')});a.push(el.dataset.type,el.dataset.kind,el.dataset.tile,el.className,el.textContent||'');return norm(a.filter(Boolean).join(' '))}
 function kind(el){const t=textOf(el);if(el.classList.contains('emil')||/(^| )э($| )|эмил|emil/.test(t))return'emil';if(el.classList.contains('report')||/отчет|report|📄/.test(t))return'report';if(el.classList.contains('web')||/паутин|web/.test(t))return'web';if(/паучих|spider_woman/.test(t))return'spider_woman';if(/батен|batenin/.test(t))return'batenin';if(/блок|block|черн|black|спис/.test(t))return'black_list';return''}
 function goalKind(ch){const t=norm(ch.textContent||'');if(/эмил|убрать эмиля/.test(t))return'emil';if(/отчет|отчеты|отчета|отчёт/.test(t))return'report';if(/паутин/.test(t))return'web';if(/паучих/.test(t))return'spider_woman';if(/батен/.test(t))return'batenin';if(/блок|черн|спис/.test(t))return'black_list';return''}
-function paintEl(el,k){if(!k||!ART||!ART[k])return;st();if(el.dataset.rzRealKey===k&&el.querySelector(':scope > .rz-surface'))return;el.dataset.rzRealKey=k;el.classList.add('rz-real-art','rz-stable');let surf=el.querySelector(':scope > .rz-surface');if(!surf){surf=document.createElement('span');surf.className='rz-surface';el.prepend(surf)}surf.style.backgroundImage=`url("${ART[k]}")`;let ov=el.querySelector(':scope > .rz-overlay');if(!ov){ov=document.createElement('span');ov.className='rz-overlay';el.appendChild(ov)}const label=LABEL[k]||'';let b=el.querySelector(':scope > .rz-badge');if(label){if(!b){b=document.createElement('span');b.className='rz-badge';el.appendChild(b)}b.textContent=label}else if(b&&['spider_woman','batenin','web','black_list'].includes(k)){b.remove()}['.tile-short','.tile-name','.blocker-short','.blocker-name'].forEach(s=>{const n=el.querySelector(s);if(n){n.style.display='none';n.style.opacity='0';n.style.visibility='hidden'}})}
+function paintEl(el,k){if(!k||!ART||!ART[k])return;st();if(el.dataset.rzRealKey===k&&el.querySelector(':scope > .rz-surface'))return;el.dataset.rzRealKey=k;el.classList.add('rz-real-art','rz-stable');let surf=el.querySelector(':scope > .rz-surface');if(!surf){surf=document.createElement('span');surf.className='rz-surface';el.prepend(surf)}surf.style.backgroundImage=`url("${ART[k]}")`;let ov=el.querySelector(':scope > .rz-overlay');if(!ov){ov=document.createElement('span');ov.className='rz-overlay';el.appendChild(ov)}const label=LABEL[k]||'';let b=el.querySelector(':scope > .rz-badge');if(label){if(!b){b=document.createElement('span');b.className='rz-badge';el.appendChild(b)}b.textContent=label}else if(b){b.remove()}['.tile-short','.tile-name','.blocker-short','.blocker-name'].forEach(s=>{const n=el.querySelector(s);if(n){n.style.display='none';n.style.opacity='0';n.style.visibility='hidden'}})}
 function paintGoal(ch,k){if(!k||!ART||!ART[k])return;st();const icon=ch.querySelector('.goal-icon');if(!icon)return;if(icon.dataset.rzRealGoal===k&&icon.querySelector('img'))return;icon.dataset.rzRealGoal=k;icon.innerHTML='<img src="'+ART[k]+'" alt="">';ch.classList.add('rz-real-goal')}
 function paint(){if(!ART)return;document.querySelectorAll('#board .blocker,#board .tile').forEach(el=>paintEl(el,kind(el)));document.querySelectorAll('.goal-chip').forEach(ch=>paintGoal(ch,goalKind(ch)))}
 let raf=0;function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;paint()})}
