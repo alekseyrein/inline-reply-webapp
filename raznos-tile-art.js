@@ -9,36 +9,36 @@
         <defs>
           <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#eef3ff"/>
-            <stop offset="1" stop-color="#bfc9d8"/>
+            <stop offset="1" stop-color="#bcc7d8"/>
           </linearGradient>
           <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="1" stop-color="#8e99aa"/>
+            <stop offset="1" stop-color="#8d99aa"/>
           </linearGradient>
         </defs>
         <rect width="100" height="100" rx="22" fill="url(#bg)"/>
-        <rect x="34" y="15" width="32" height="43" rx="16" fill="url(#metal)" stroke="#6e7888" stroke-width="3"/>
-        <path d="M25 44a25 25 0 0 0 50 0" fill="none" stroke="#687385" stroke-width="5" stroke-linecap="round"/>
-        <path d="M50 69v11" stroke="#687385" stroke-width="5" stroke-linecap="round"/>
-        <path d="M38 82h24" stroke="#687385" stroke-width="5" stroke-linecap="round"/>
+        <rect x="34" y="14" width="32" height="44" rx="16" fill="url(#metal)" stroke="#6c7687" stroke-width="3"/>
+        <path d="M25 44a25 25 0 0 0 50 0" fill="none" stroke="#667284" stroke-width="5" stroke-linecap="round"/>
+        <path d="M50 69v11" stroke="#667284" stroke-width="5" stroke-linecap="round"/>
+        <path d="M38 82h24" stroke="#667284" stroke-width="5" stroke-linecap="round"/>
       </svg>
     `),
     P: svg(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
         <defs>
           <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#8f8030"/>
-            <stop offset="1" stop-color="#4f4518"/>
+            <stop offset="0" stop-color="#938232"/>
+            <stop offset="1" stop-color="#4d4318"/>
           </linearGradient>
           <linearGradient id="ticket" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#f4dc79"/>
-            <stop offset="1" stop-color="#c8a642"/>
+            <stop offset="0" stop-color="#f6de7d"/>
+            <stop offset="1" stop-color="#c9a743"/>
           </linearGradient>
         </defs>
         <rect width="100" height="100" rx="22" fill="url(#bg)"/>
         <path d="M21 32h58a6 6 0 0 1 6 6v8a8 8 0 0 0 0 16v8a6 6 0 0 1-6 6H21a6 6 0 0 1-6-6v-8a8 8 0 0 0 0-16v-8a6 6 0 0 1 6-6z"
-              fill="url(#ticket)" stroke="#584813" stroke-width="3"/>
-        <path d="M34 42h20M34 51h18M34 60h24" stroke="#7d651a" stroke-width="4" stroke-linecap="round"/>
+              fill="url(#ticket)" stroke="#5a4914" stroke-width="3"/>
+        <path d="M34 42h20M34 51h18M34 60h24" stroke="#7c651a" stroke-width="4" stroke-linecap="round"/>
         <circle cx="68" cy="51" r="7" fill="#a68322"/>
         <path d="M68 45v12" stroke="#f8e8b4" stroke-width="2.6" stroke-linecap="round"/>
       </svg>
@@ -52,7 +52,34 @@
     e.id = 'rts';
     e.textContent = `
       .tile.ta {
-        overflow: hidden;
+        overflow: hidden !important;
+        background: transparent !important;
+        background-image: none !important;
+        border: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      .tile.ta::before,
+      .tile.ta::after {
+        display: none !important;
+        content: none !important;
+        background: none !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .tile.ta .tile-bg,
+      .tile.ta .tile-face,
+      .tile.ta .tile-inner,
+      .tile.ta .tile-fill,
+      .tile.ta .gem-face,
+      .tile.ta .gem-bg {
+        display: none !important;
+        opacity: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
       }
 
       .tile.ta .tile-name {
@@ -61,11 +88,13 @@
 
       .tile.ta .tai {
         position: absolute;
-        inset: 0;
+        inset: -2px !important;
         border-radius: inherit;
         overflow: hidden;
-        z-index: 0;
+        z-index: 1;
         pointer-events: none;
+        background: transparent !important;
+        box-shadow: none !important;
       }
 
       .tile.ta .tai img {
@@ -74,11 +103,10 @@
         display: block;
         object-fit: cover;
         object-position: center;
-      }
-
-      /* убираем ощущение "рамка в рамке" */
-      .tile.ta::before {
-        display: none !important;
+        transform: scale(1.045);
+        transform-origin: center;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
       }
 
       .tile.ta .tile-short {
@@ -91,7 +119,7 @@
         margin: 0;
         padding: 2px 5px;
         border-radius: 999px;
-        background: rgba(8,8,12,.62);
+        background: rgba(8, 8, 12, 0.62);
         border: 1px solid rgba(255,255,255,.16);
         font-size: 10px !important;
         line-height: 1 !important;
@@ -101,10 +129,13 @@
         box-shadow: 0 4px 10px rgba(0,0,0,.22);
       }
 
-      .cell.selected .tile.ta .tile-short,
-      .tile.ta.selected .tile-short,
-      .tile.ta.is-selected .tile-short {
-        transform: scale(.98);
+      .tile.ta.selected,
+      .tile.ta.is-selected,
+      .cell.selected .tile.ta,
+      .cell.is-selected .tile.ta {
+        box-shadow:
+          0 0 0 2px rgba(255,255,255,.28),
+          0 0 18px rgba(255,255,255,.10) !important;
       }
 
       @media (max-width: 640px) {
@@ -182,13 +213,21 @@
   function ensureArt(tile, code, src) {
     tile.classList.add('ta');
 
+    tile.style.background = 'transparent';
+    tile.style.backgroundImage = 'none';
+    tile.style.border = '0';
+    tile.style.outline = 'none';
+    tile.style.boxShadow = 'none';
+
     let wrap = tile.querySelector('.tai');
     if (!wrap) {
       wrap = document.createElement('span');
       wrap.className = 'tai';
+
       const img = document.createElement('img');
       img.alt = code;
       img.loading = 'eager';
+
       wrap.appendChild(img);
       tile.prepend(wrap);
     }
