@@ -15,6 +15,8 @@ function css(){
  s.id='rz-v3-polish-style';
  s.textContent=`
 .skills{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;overflow:visible!important;padding:4px!important;min-height:34px!important}.skills-label{display:none!important}.skill{justify-content:center!important;padding:3px!important;min-width:0!important;border-radius:12px!important}.skill span:not(.icon){font-size:9px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}.skill .icon{width:24px!important;height:24px!important;min-width:24px!important}.goals>.chip{cursor:pointer!important}.boss-pill{min-height:44px!important}.boss-text{font-size:12px!important;line-height:1.16!important}.tile .art{background-size:cover!important}.tile[data-rz-art="pass"] .art,.tile[data-rz-art="mic"] .art{background-size:cover!important;background-position:center!important}#helpText{white-space:pre-line!important}
+.cell .tile{animation:rzTileIn .18s cubic-bezier(.2,.9,.2,1)}.cell.selected .tile{animation:rzSelectedPulse .72s ease-in-out infinite}.toast.show{animation:rzToastPop .34s cubic-bezier(.2,1.35,.3,1)}.badge.rz-pulse,.chip.rz-pulse,.skill.rz-pulse,.boss-pill.rz-pulse{animation:rzUiPulse .52s ease-out}.web-layer{animation:rzWebBreath 1.8s ease-in-out infinite}.locked-layer{animation:rzLockGlow 1.9s ease-in-out infinite}.boss-pill.show{animation:rzBossIdle 2.4s ease-in-out infinite}.rz-cell-ripple{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:30;background:radial-gradient(circle,rgba(255,255,255,.46),rgba(255,86,208,.22) 34%,transparent 68%);animation:rzRipple .38s ease-out forwards}.rz-burst{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:85}.rz-burst i{position:absolute;width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#ff56d0,#f2cf77);box-shadow:0 0 10px rgba(255,86,208,.65);animation:rzParticle .72s ease-out forwards}.rz-board-shake{animation:rzBoardShake .22s ease-out}.rz-board-glow{animation:rzBoardGlow .55s ease-out}.rz-skill-flash{animation:rzSkillFlash .72s ease-out!important}.rz-score-float{position:absolute;right:18px;top:58px;z-index:75;font-weight:950;color:#f2cf77;text-shadow:0 2px 10px rgba(0,0,0,.55);pointer-events:none;animation:rzScoreFloat .9s ease-out forwards}
+@keyframes rzTileIn{from{opacity:.72;transform:scale(.88) translateY(-3px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes rzSelectedPulse{0%,100%{filter:brightness(1);transform:scale(1)}50%{filter:brightness(1.14);transform:scale(1.035)}}@keyframes rzToastPop{0%{transform:translateX(-50%) translateY(28px) scale(.92)}70%{transform:translateX(-50%) translateY(-2px) scale(1.04)}100%{transform:translateX(-50%) translateY(0) scale(1)}}@keyframes rzUiPulse{0%{box-shadow:0 0 0 0 rgba(255,86,208,0)}35%{box-shadow:0 0 0 4px rgba(255,86,208,.28)}100%{box-shadow:0 0 0 0 rgba(255,86,208,0)}}@keyframes rzWebBreath{0%,100%{opacity:.92;filter:brightness(1)}50%{opacity:1;filter:brightness(1.18)}}@keyframes rzLockGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22)}}@keyframes rzBossIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}@keyframes rzRipple{0%{opacity:.65;transform:scale(.4)}100%{opacity:0;transform:scale(1.45)}}@keyframes rzParticle{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.25)}}@keyframes rzBoardShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}55%{transform:translateX(3px)}75%{transform:translateX(-1px)}}@keyframes rzBoardGlow{0%{box-shadow:0 14px 30px rgba(0,0,0,.35)}35%{box-shadow:0 0 0 3px rgba(255,86,208,.22),0 18px 38px rgba(143,79,255,.35)}100%{box-shadow:0 14px 30px rgba(0,0,0,.35)}}@keyframes rzSkillFlash{0%{transform:scale(1);filter:brightness(1)}35%{transform:scale(1.05);filter:brightness(1.28)}100%{transform:scale(1);filter:brightness(1)}}@keyframes rzScoreFloat{0%{opacity:0;transform:translateY(8px) scale(.9)}18%{opacity:1}100%{opacity:0;transform:translateY(-24px) scale(1.08)}}
 @media(max-height:720px){.skills{grid-template-columns:repeat(4,minmax(0,1fr))!important}.skill span:not(.icon){display:block!important;font-size:0!important}.skill .icon{width:26px!important;height:26px!important;min-width:26px!important}}
 `;
  document.head.appendChild(s)
@@ -49,12 +51,28 @@ function markPMArts(){
  }catch(e){}
 }
 function patchNames(){try{TILE.black.name='Блэк Настя';TILE.pass.name='Клиенты';TILE.mic.name='Карта'}catch(e){}}
+function pulse(el){if(!el)return;el.classList.remove('rz-pulse');void el.offsetWidth;el.classList.add('rz-pulse')}
+function pulseSkillByText(text){try{document.querySelectorAll('.skill').forEach(s=>{if((s.textContent||'').toLowerCase().includes(text))s.classList.add('rz-skill-flash'),setTimeout(()=>s.classList.remove('rz-skill-flash'),780)})}catch(e){}}
+function boardFx(kind='glow'){const b=document.getElementById('board');if(!b)return;const cls=kind==='shake'?'rz-board-shake':'rz-board-glow';b.classList.remove(cls);void b.offsetWidth;b.classList.add(cls);setTimeout(()=>b.classList.remove(cls),650)}
+function burst(){const app=document.querySelector('.app')||document.body;const box=document.createElement('div');box.className='rz-burst';const rect=(document.getElementById('board')||app).getBoundingClientRect();box.style.left=(rect.left+rect.width/2)+'px';box.style.top=(rect.top+rect.height/2)+'px';for(let i=0;i<14;i++){const p=document.createElement('i');const a=Math.PI*2*i/14;const d=38+Math.random()*32;p.style.setProperty('--x',Math.cos(a)*d+'px');p.style.setProperty('--y',Math.sin(a)*d+'px');box.appendChild(p)}app.appendChild(box);setTimeout(()=>box.remove(),850)}
+function scoreFloat(txt){const app=document.querySelector('.app')||document.body;const el=document.createElement('div');el.className='rz-score-float';el.textContent=txt;app.appendChild(el);setTimeout(()=>el.remove(),950)}
 function patchBoss(){
  try{
   if(window.__rzV3BossPatched)return;window.__rzV3BossPatched=true;
   const old=renderHud;
   renderHud=function(){old();try{if(level().boss){bossText.textContent='Батенин уже печатает приказ — через '+st.bossLeft+' х. Без паники.'}}catch(e){};markPMArts()};
  }catch(e){}
+}
+function patchToastFx(){
+ try{
+  if(window.__rzV3ToastFxPatched)return;window.__rzV3ToastFxPatched=true;
+  const old=toast;
+  toast=function(t){old(t);const low=String(t||'').toLowerCase();if(low.includes('рывок')){pulseSkillByText('рывок');pulse(document.getElementById('movesBadge')?.closest('.badge'));scoreFloat('+1 ход')}if(low.includes('black mode')){pulseSkillByText('black');boardFx('glow');burst()}if(low.includes('глам')){pulseSkillByText('глам');boardFx('glow');burst()}if(low.includes('дискоряд')){pulseSkillByText('дискоряд');boardFx('shake');burst()}if(low.includes('скандал')){boardFx('glow');burst();scoreFloat('+спец')}if(low.includes('батенин')){pulse(document.getElementById('bossPill'));boardFx('shake')}if(low.includes('паучиха')||low.includes('паутина'))boardFx('glow')}
+ }catch(e){}
+}
+function bindTapRipple(){
+ if(window.__rzV3RippleBound)return;window.__rzV3RippleBound=true;
+ document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.closest('#board .cell');if(!c)return;const r=document.createElement('span');r.className='rz-cell-ripple';c.appendChild(r);setTimeout(()=>r.remove(),420)},true)
 }
 function bindGoalHelp(){
  if(window.__rzV3GoalHelpBound)return;window.__rzV3GoalHelpBound=true;
@@ -95,6 +113,6 @@ function runSelfTest(show=true){
 function maybeAutoSelfTest(){
  try{if(new URLSearchParams(location.search).has('selftest'))setTimeout(()=>runSelfTest(true),1700)}catch(e){}
 }
-function init(){css();patchNames();patchBoss();bindGoalHelp();loadTbankArts();setTimeout(()=>{try{renderAll();markPMArts()}catch(e){}},250);setTimeout(loadTbankArts,900);setTimeout(markPMArts,1200);window.rzV3SelfTest=runSelfTest;maybeAutoSelfTest()}
+function init(){css();patchNames();patchBoss();patchToastFx();bindTapRipple();bindGoalHelp();loadTbankArts();setTimeout(()=>{try{renderAll();markPMArts()}catch(e){}},250);setTimeout(loadTbankArts,900);setTimeout(markPMArts,1200);window.rzV3SelfTest=runSelfTest;maybeAutoSelfTest()}
 document.addEventListener('DOMContentLoaded',init);window.addEventListener('load',init);setTimeout(init,0);setTimeout(init,700);
 })();
