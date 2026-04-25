@@ -58,20 +58,23 @@ function setHelp(el,k){
  if(!el||!k||!HELP[k])return;
  el.classList.add('rz-helpable');
  el.dataset.rzHelpKey=k;
+ el.style.pointerEvents='auto';
+ el.onclick=function(ev){openFor(el,ev)};
+ el.ontouchend=function(ev){openFor(el,ev)};
 }
-function clearBroadHelp(){
- document.querySelectorAll('.rz-helpable,.rz-passive-helpable').forEach(el=>{
+function clearBadHelp(){
+ document.querySelectorAll('.rz-helpable').forEach(el=>{
   if(el.closest('#board,#rzHelpOverlay,.overlay,#startOverlay,#levelsOverlay,#resultOverlay'))return;
-  if(!el.matches('.goal-chip,.badge,.rz-skill-mini')){el.classList.remove('rz-helpable','rz-passive-helpable');delete el.dataset.rzHelpKey}
+  if(!el.matches('.goal-chip,.badge,.rz-skill-mini')){el.classList.remove('rz-helpable');delete el.dataset.rzHelpKey;el.onclick=null;el.ontouchend=null}
  });
 }
 function markHelpables(){
  st();
- clearBroadHelp();
+ clearBadHelp();
  document.querySelectorAll('.goal-chip').forEach(ch=>{
   if(ch.closest('#startOverlay,#levelsOverlay,#resultOverlay,#rzHelpOverlay'))return;
   const k=keyForText(ch.querySelector('.goal-title')?.textContent||ch.textContent);
-  if(k)setHelp(ch,k); else {ch.classList.remove('rz-helpable','rz-passive-helpable');delete ch.dataset.rzHelpKey}
+  if(k)setHelp(ch,k); else {ch.classList.remove('rz-helpable');delete ch.dataset.rzHelpKey;ch.onclick=null;ch.ontouchend=null}
  });
  document.querySelectorAll('.rz-skill-mini').forEach(m=>{
   const k=keyForText(m.textContent||m.dataset.rzHelpKey);
@@ -84,22 +87,26 @@ function markHelpables(){
 }
 function cleanTiles(){
  st();
+ // Важно: не стираем textContent. Арт-скрипты используют текстовые метки, поэтому только визуально скрываем буквы.
  document.querySelectorAll('#board .rz-badge,#board .tile-short,#board .tile-name,#board .blocker-short,#board .blocker-name').forEach(el=>{
-  el.style.display='none';el.style.opacity='0';el.style.visibility='hidden';el.textContent='';
+  el.style.display='none';el.style.opacity='0';el.style.visibility='hidden';
  });
+}
+function openFor(node,e){
+ const h=helpByKey(node?.dataset?.rzHelpKey);
+ if(!h)return;
+ if(e){e.preventDefault();e.stopPropagation()}
+ node.classList.remove('rz-help-pulse');void node.offsetWidth;node.classList.add('rz-help-pulse');
+ show(h.title,h.text);
 }
 function tick(){markHelpables();cleanTiles()}
 function handleHelpTap(e){
  const node=e.target.closest&&e.target.closest('.goal-chip.rz-helpable,.badge.rz-helpable,.rz-skill-mini.rz-helpable');
  if(!node)return;
- const h=helpByKey(node.dataset.rzHelpKey);
- if(!h)return;
- e.preventDefault();e.stopPropagation();
- node.classList.remove('rz-help-pulse');void node.offsetWidth;node.classList.add('rz-help-pulse');
- show(h.title,h.text);
+ openFor(node,e);
 }
 document.addEventListener('click',handleHelpTap,true);
 document.addEventListener('touchend',handleHelpTap,true);
 document.addEventListener('pointerup',handleHelpTap,true);
-document.addEventListener('DOMContentLoaded',tick);window.addEventListener('load',tick);setInterval(tick,500);setTimeout(tick,0);setTimeout(tick,500);
+document.addEventListener('DOMContentLoaded',tick);window.addEventListener('load',tick);setInterval(tick,450);setTimeout(tick,0);setTimeout(tick,500);
 })();
