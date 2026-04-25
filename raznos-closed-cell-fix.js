@@ -36,7 +36,7 @@ function isReport(cell){
 }
 function hasClosedState(cell){
   if(!cell||isReport(cell))return false;
-  if(cell.closed||cell.locked||cell.blocked||cell.isClosed||cell.isLocked||cell.isBlocked||cell.wall||cell.noCell)return true;
+  if(cell.closed||cell.locked||cell.isClosed||cell.isLocked||cell.wall||cell.noCell)return true;
   const vals=[cell.type,cell.kind,cell.id,cell.name,cell.short,cell.role,cell.blocker,cell.blockerType,cell.state,cell.status].map(norm);
   return vals.some(v=>v==='closed'||v==='locked'||v==='lock'||v==='black_list'||v==='blacklist'||v==='закрыто'||v==='закрыт'||v==='закрытая'||v.includes('closed')||v.includes('locked')||v.includes('black_list')||v.includes('blacklist')||v.includes('закрыт'));
 }
@@ -46,14 +46,14 @@ function hasClosedDom(cell){
   if(cell.querySelector('[class*="closed"],[class*="locked"],[class*="black-list"],[class*="black_list"]'))return true;
   return false;
 }
-function looksLikeClosedVisual(cell){return false}
 function isClosedCell(cell,i){
   if(!cell||cell.closest('.overlay,#startOverlay,#levelsOverlay,#resultOverlay'))return false;
   if(isReport(getStateCellByIndex(i)))return false;
   if(hasClosedDom(cell))return true;
   if(hasClosedState(getStateCellByIndex(i)))return true;
-  if(cell===lastTapped&&Date.now()-(lastTapped.__rzClosedTapTime||0)<1200)return true;
-  return looksLikeClosedVisual(cell);
+  // Временный арт блока показываем только после реального ответа игры «Клетка закрыта».
+  if(cell===lastTapped&&cell.__rzClosedConfirmedAt&&Date.now()-cell.__rzClosedConfirmedAt<1200)return true;
+  return false;
 }
 function mark(cell,on){
   if(!art)return;
@@ -87,11 +87,11 @@ function watchClosedToast(){
   if(!toast||toast.__rzClosedToastObs)return;
   toast.__rzClosedToastObs=1;
   new MutationObserver(()=>{
-    if(norm(toast.textContent).includes('клетка закрыта')&&lastTapped){lastTapped.__rzClosedTapTime=Date.now();schedule()}
+    if(norm(toast.textContent).includes('клетка закрыта')&&lastTapped){lastTapped.__rzClosedConfirmedAt=Date.now();schedule()}
   }).observe(toast,{childList:true,characterData:true,subtree:true,attributes:true});
 }
 async function start(){st();bind();watchClosedToast();await load();schedule();setTimeout(schedule,120);setTimeout(schedule,600);setTimeout(schedule,1400)}
-document.addEventListener('pointerdown',e=>{const cell=e.target.closest&&e.target.closest('#board .cell');if(cell){lastTapped=cell;lastTapped.__rzClosedTapTime=Date.now()}},true);
+document.addEventListener('pointerdown',e=>{const cell=e.target.closest&&e.target.closest('#board .cell');if(cell){lastTapped=cell}},true);
 document.addEventListener('DOMContentLoaded',start);
 window.addEventListener('load',start);
 setTimeout(start,0);
