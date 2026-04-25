@@ -17,8 +17,7 @@ function st(){
 #board .tile-short,#board .tile-name,#board .blocker-short,#board .blocker-name,#board .rz-badge,#board .label,#board .letter{display:none!important;opacity:0!important;visibility:hidden!important;color:transparent!important;text-shadow:none!important;font-size:0!important}
 #board .tile,#board .blocker,#board .rz-final-special{font-size:0!important;color:transparent!important;text-shadow:none!important}
 #board .rz-closed-art::after{display:none!important;content:none!important}
-.goal-chip.rz-helpable,.rz-skill-strip,.rz-skill-mini,.badge.rz-helpable,.rz-passive-helpable{cursor:pointer!important;-webkit-tap-highlight-color:rgba(255,255,255,.08)!important}
-.goal-chip.rz-helpable:active,.rz-skill-mini:active,.badge.rz-helpable:active,.rz-passive-helpable:active{transform:scale(.985)!important}
+.rz-helpable{cursor:pointer!important;-webkit-tap-highlight-color:rgba(255,255,255,.08)!important}.rz-helpable:active{transform:scale(.985)!important}
 .rz-help-overlay{position:absolute!important;inset:0!important;z-index:80!important;display:none!important;align-items:center!important;justify-content:center!important;padding:18px 14px calc(18px + var(--safe-bottom,0px))!important;background:rgba(4,4,8,.66)!important}.rz-help-overlay.active{display:flex!important}.rz-help-card{width:min(100%,430px)!important;border-radius:22px!important;padding:18px!important;background:linear-gradient(180deg,rgba(28,22,42,.98),rgba(11,9,16,.98))!important;border:1px solid rgba(255,255,255,.09)!important;box-shadow:0 18px 44px rgba(0,0,0,.48)!important;color:#fff!important}.rz-help-title{font-size:24px!important;line-height:1.06!important;font-weight:950!important}.rz-help-text{margin-top:9px!important;font-size:14px!important;line-height:1.38!important;color:#cbc3da!important}.rz-help-actions{margin-top:14px!important;display:grid!important}.rz-help-actions button{min-height:44px!important;border-radius:15px!important;border:1px solid rgba(255,255,255,.10)!important;background:linear-gradient(135deg,#ff56d0,#8f4fff)!important;color:#fff!important;font-weight:950!important;font:inherit!important}
 .rz-help-pulse{animation:rzHelpPulse .38s ease-out}@keyframes rzHelpPulse{0%{box-shadow:0 0 0 0 rgba(255,86,208,.0)}40%{box-shadow:0 0 0 3px rgba(255,86,208,.23)}100%{box-shadow:0 0 0 0 rgba(255,86,208,.0)}}
 `;
@@ -43,40 +42,45 @@ function show(title,text){
  ov.classList.add('active');
 }
 function hide(){document.getElementById('rzHelpOverlay')?.classList.remove('active')}
-function helpForText(txt){
+function keyForText(txt){
  txt=norm(txt);
- if(txt.includes('black'))return HELP['black mode'];
- if(txt.includes('рывок'))return HELP['рывок'];
- if(txt.includes('глам'))return HELP['глам-подмена'];
- if(txt.includes('дискоряд')||txt.includes('вова'))return HELP['дискоряд'];
- if(txt.includes('жар'))return HELP['жар'];
- if(txt.includes('ходы'))return HELP['ходы'];
- if(txt.includes('очки'))return HELP['очки'];
- return null;
+ if(txt.includes('black'))return 'black mode';
+ if(txt.includes('рывок'))return 'рывок';
+ if(txt.includes('глам'))return 'глам-подмена';
+ if(txt.includes('дискоряд'))return 'дискоряд';
+ if(txt.includes('жар'))return 'жар';
+ if(txt.includes('ходы'))return 'ходы';
+ if(txt.includes('очки'))return 'очки';
+ return '';
 }
-function candidateFromTarget(target){
- if(!target||!target.closest)return null;
- const direct=target.closest('.goal-chip,.badge,.rz-skill-mini,.rz-skill-strip,.rz-passive-helpable');
- if(direct&&helpForText(direct.textContent||direct.dataset.rzHelpKey))return direct;
- let node=target;
- const stop=document.querySelector('.app')||document.body;
- for(let i=0;node&&node!==stop&&i<8;i++,node=node.parentElement){
-  const h=helpForText(node.textContent||node.dataset?.rzHelpKey);
-  if(h){
-   const r=node.getBoundingClientRect?.();
-   if(r&&r.width>40&&r.height>24&&r.width<520&&r.height<160&&!node.closest('#board,.overlay,#startOverlay,#levelsOverlay,#resultOverlay,#rzHelpOverlay'))return node;
-  }
- }
- return null;
+function helpByKey(k){return HELP[norm(k)]||null}
+function setHelp(el,k){
+ if(!el||!k||!HELP[k])return;
+ el.classList.add('rz-helpable');
+ el.dataset.rzHelpKey=k;
+}
+function clearBroadHelp(){
+ document.querySelectorAll('.rz-helpable,.rz-passive-helpable').forEach(el=>{
+  if(el.closest('#board,#rzHelpOverlay,.overlay,#startOverlay,#levelsOverlay,#resultOverlay'))return;
+  if(!el.matches('.goal-chip,.badge,.rz-skill-mini')){el.classList.remove('rz-helpable','rz-passive-helpable');delete el.dataset.rzHelpKey}
+ });
 }
 function markHelpables(){
  st();
- document.querySelectorAll('.goal-chip,.badge,.panel *,.topbar *').forEach(ch=>{
-  if(ch.closest('#board,#rzHelpOverlay,.overlay,#startOverlay,#levelsOverlay,#resultOverlay'))return;
-  const h=helpForText(ch.textContent||ch.dataset?.rzHelpKey);
-  if(h){ch.classList.add(ch.classList.contains('badge')?'rz-helpable':'rz-passive-helpable');ch.dataset.rzHelpKey=h.title}
+ clearBroadHelp();
+ document.querySelectorAll('.goal-chip').forEach(ch=>{
+  if(ch.closest('#startOverlay,#levelsOverlay,#resultOverlay,#rzHelpOverlay'))return;
+  const k=keyForText(ch.querySelector('.goal-title')?.textContent||ch.textContent);
+  if(k)setHelp(ch,k); else {ch.classList.remove('rz-helpable','rz-passive-helpable');delete ch.dataset.rzHelpKey}
  });
- document.querySelectorAll('.rz-skill-mini').forEach(m=>m.classList.add('rz-helpable'));
+ document.querySelectorAll('.rz-skill-mini').forEach(m=>{
+  const k=keyForText(m.textContent||m.dataset.rzHelpKey);
+  if(k)setHelp(m,k);
+ });
+ document.querySelectorAll('.badge').forEach(b=>{
+  const k=keyForText(b.textContent);
+  if(k)setHelp(b,k);
+ });
 }
 function cleanTiles(){
  st();
@@ -86,9 +90,9 @@ function cleanTiles(){
 }
 function tick(){markHelpables();cleanTiles()}
 function handleHelpTap(e){
- const node=candidateFromTarget(e.target);
+ const node=e.target.closest&&e.target.closest('.goal-chip.rz-helpable,.badge.rz-helpable,.rz-skill-mini.rz-helpable');
  if(!node)return;
- const h=helpForText(node.textContent||node.dataset.rzHelpKey);
+ const h=helpByKey(node.dataset.rzHelpKey);
  if(!h)return;
  e.preventDefault();e.stopPropagation();
  node.classList.remove('rz-help-pulse');void node.offsetWidth;node.classList.add('rz-help-pulse');
