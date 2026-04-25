@@ -9,7 +9,7 @@ function st(){
 #board .cell.rz-closed-cell>.tile,#board .cell.rz-closed-cell>.blocker{filter:brightness(.22) saturate(.75)!important;opacity:.22!important}
 #board .cell.rz-closed-cell>.overlay-web{display:none!important;opacity:0!important;visibility:hidden!important}
 #board .cell.rz-closed-cell>.rz-closed-art{position:absolute!important;inset:0!important;z-index:18!important;display:block!important;border-radius:inherit!important;background:var(--rz-closed-img) center/cover no-repeat!important;box-shadow:inset 0 0 0 1px rgba(255,210,120,.20),0 0 16px rgba(255,82,82,.24)!important;pointer-events:none!important;transform:translateZ(0)!important;backface-visibility:hidden!important}
-#board .cell.rz-closed-cell>.rz-closed-art::after{content:'Блок'!important;position:absolute!important;right:4px!important;bottom:4px!important;padding:2px 5px!important;border-radius:999px!important;background:rgba(8,8,12,.72)!important;border:1px solid rgba(255,255,255,.16)!important;color:#fff!important;font-size:10px!important;line-height:1!important;font-weight:900!important;text-shadow:none!important}
+#board .cell.rz-closed-cell>.rz-closed-art::after{display:none!important;content:none!important}
 `;
   document.head.appendChild(s);
 }
@@ -29,32 +29,30 @@ function getStateCellByIndex(i){
     return state.board[i];
   }catch{return null}
 }
-function hasClosedState(cell){
+function isReport(cell){
   if(!cell)return false;
+  const vals=[cell.type,cell.kind,cell.id,cell.name,cell.short,cell.role,cell.blocker,cell.blockerType,cell.state,cell.status].map(norm);
+  return vals.some(v=>v==='report'||v==='отчет'||v==='отчёт'||v.includes('report')||v.includes('отчет')||v.includes('отчёт'));
+}
+function hasClosedState(cell){
+  if(!cell||isReport(cell))return false;
   if(cell.closed||cell.locked||cell.blocked||cell.isClosed||cell.isLocked||cell.isBlocked||cell.wall||cell.noCell)return true;
   const vals=[cell.type,cell.kind,cell.id,cell.name,cell.short,cell.role,cell.blocker,cell.blockerType,cell.state,cell.status].map(norm);
-  return vals.some(v=>v==='closed'||v==='locked'||v==='lock'||v==='block'||v==='blocked'||v==='black_list'||v==='blacklist'||v==='закрыто'||v==='закрыт'||v==='закрытая'||v.includes('closed')||v.includes('locked')||v.includes('black_list')||v.includes('blacklist')||v.includes('закрыт'));
+  return vals.some(v=>v==='closed'||v==='locked'||v==='lock'||v==='black_list'||v==='blacklist'||v==='закрыто'||v==='закрыт'||v==='закрытая'||v.includes('closed')||v.includes('locked')||v.includes('black_list')||v.includes('blacklist')||v.includes('закрыт'));
 }
 function hasClosedDom(cell){
-  const t=norm([cell.className,cell.dataset?.type,cell.dataset?.kind,cell.dataset?.cell,cell.dataset?.state,cell.getAttribute('aria-label'),cell.title,cell.textContent].filter(Boolean).join(' '));
-  if(/closed|locked|lock|blocked|black-list|black_list|blacklist|закрыт|закрыта|закрыто|блок/.test(t))return true;
-  if(cell.querySelector('[class*="closed"],[class*="locked"],[class*="lock"],[class*="blocked"],[class*="black-list"],[class*="black_list"]'))return true;
+  const t=norm([cell.className,cell.dataset?.type,cell.dataset?.kind,cell.dataset?.cell,cell.dataset?.state,cell.getAttribute('aria-label'),cell.title].filter(Boolean).join(' '));
+  if(/closed|locked|black-list|black_list|blacklist|закрыт|закрыта|закрыто/.test(t))return true;
+  if(cell.querySelector('[class*="closed"],[class*="locked"],[class*="black-list"],[class*="black_list"]'))return true;
   return false;
 }
-function looksLikeClosedVisual(cell){
-  // Closed cells in the current build often have an overlay but no real movable tile label.
-  if(cell.classList.contains('rz-web-cell')&&cell.querySelector(':scope>.overlay-web')){
-    const hasTile=cell.querySelector(':scope>.tile,:scope>.blocker');
-    const hasBadge=cell.querySelector(':scope .rz-badge,:scope .tile-short,:scope .blocker-short');
-    if(!hasTile||!hasBadge)return true;
-  }
-  return false;
-}
+function looksLikeClosedVisual(cell){return false}
 function isClosedCell(cell,i){
   if(!cell||cell.closest('.overlay,#startOverlay,#levelsOverlay,#resultOverlay'))return false;
+  if(isReport(getStateCellByIndex(i)))return false;
   if(hasClosedDom(cell))return true;
   if(hasClosedState(getStateCellByIndex(i)))return true;
-  if(cell===lastTapped&&Date.now()-(lastTapped.__rzClosedTapTime||0)<1400)return true;
+  if(cell===lastTapped&&Date.now()-(lastTapped.__rzClosedTapTime||0)<1200)return true;
   return looksLikeClosedVisual(cell);
 }
 function mark(cell,on){
