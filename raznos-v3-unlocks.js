@@ -1,6 +1,7 @@
 (()=>{
 const STORE_UNLOCK='raznos_v3_unlocked_max';
 const STORE_DEV='raznos_v3_dev_all';
+const STORE_UNLOCK_BACKUP='raznos_v3_unlocked_backup';
 const CODE=[[0,0],[6,6],[0,6],[6,0]];
 function css(){
   if(document.getElementById('rz-v3-unlocks-style'))return;
@@ -20,10 +21,20 @@ function setUnlockedMax(n){
 }
 function hasDevAll(){return localStorage.getItem(STORE_DEV)==='1'}
 function setDevAll(v){if(v)localStorage.setItem(STORE_DEV,'1');else localStorage.removeItem(STORE_DEV)}
+function enableDevAll(){
+  localStorage.setItem(STORE_UNLOCK_BACKUP,String(getUnlockedMax()));
+  setDevAll(true);setUnlockedMax(LEVELS.length);
+}
+function disableDevAll(){
+  setDevAll(false);
+  const backup=parseInt(localStorage.getItem(STORE_UNLOCK_BACKUP)||'1',10);
+  setUnlockedMax(Number.isFinite(backup)?backup:1);
+  localStorage.removeItem(STORE_UNLOCK_BACKUP);
+}
 function unlockNextFromCurrent(){setUnlockedMax(Math.max(getUnlockedMax(),Math.min(LEVELS.length,(st.level||0)+2)))}
 function levelsText(){
   const sub=document.querySelector('#levelsOverlay .hero-sub');
-  if(sub)sub.textContent=hasDevAll()?'Все уровни открыты: тестовый режим активирован на этом устройстве.':'Новые уровни открываются по мере прохождения.';
+  if(sub)sub.textContent=hasDevAll()?'Все уровни открыты: тестовый режим активирован на этом устройстве. Повтори секретный код, чтобы вернуть обычную прогрессию.':'Новые уровни открываются по мере прохождения.';
   const startSub=document.querySelector('#startOverlay .hero-sub');
   if(startSub)startSub.textContent='Меняй соседние фишки, собирай 3+ одинаковых, чисти Эмиля, паутину, отчёты и давление Батенина. Уровни открываются по мере прохождения.';
   const backupCard=[...document.querySelectorAll('#startOverlay .mini-card')].find(x=>(x.textContent||'').toLowerCase().includes('бэкап'));
@@ -71,8 +82,21 @@ function patchFinish(){
     if(window.__rzV3UnlockFinishPatched||typeof finish!=='function')return;
     window.__rzV3UnlockFinishPatched=true;
     const old=finish;
-    finish=function(win){if(win)unlockNextFromCurrent();const out=old.apply(this,arguments);setTimeout(()=>{try{renderLevels()}catch(e){}},30);return out};
+    finish=function(win){if(win&&!hasDevAll())unlockNextFromCurrent();const out=old.apply(this,arguments);setTimeout(()=>{try{renderLevels()}catch(e){}},30);return out};
   }catch(e){console.warn('unlock finish patch failed',e)}
+}
+function applySecretCode(){
+  if(hasDevAll()){
+    disableDevAll();
+    try{toast('Тестовый режим выключен')}catch(e){}
+    try{showHelp('Обычный режим','Тестовый режим выключен. Уровни снова открываются по мере прохождения.')}catch(e){}
+  }else{
+    enableDevAll();
+    try{toast('Тестовый режим открыт')}catch(e){}
+    try{showHelp('Тестовый режим','Все уровни открыты на этом устройстве. Повтори секретный код ещё раз, чтобы вернуть обычную прогрессию.')}catch(e){}
+  }
+  st.__devCornerProgress=0;
+  try{renderLevels()}catch(e){}
 }
 function bindCode(){
   if(window.__rzV3UnlockCodeBound)return;
@@ -80,20 +104,13 @@ function bindCode(){
   document.addEventListener('pointerdown',e=>{
     const cell=e.target.closest&&e.target.closest('#board .cell');
     if(!cell)return;
-    if(hasDevAll())return;
     if((st.level||0)!==0)return;
     const r=+cell.dataset.r,c=+cell.dataset.c;
     const p=st.__devCornerProgress||0;
     const expect=CODE[p];
     if(expect&&r===expect[0]&&c===expect[1]){
       st.__devCornerProgress=p+1;
-      if(st.__devCornerProgress>=CODE.length){
-        setDevAll(true);setUnlockedMax(LEVELS.length);
-        st.__devCornerProgress=0;
-        try{toast('Тестовый режим открыт')}catch(e){}
-        try{showHelp('Тестовый режим','Все уровни открыты на этом устройстве. Секретный код принят.')}catch(e){}
-        try{renderLevels()}catch(e){}
-      }
+      if(st.__devCornerProgress>=CODE.length)applySecretCode();
     }else{
       st.__devCornerProgress=(r===CODE[0][0]&&c===CODE[0][1])?1:0;
     }
