@@ -1,18 +1,15 @@
 // Google Forms feedback config for Raznos v3.
-// Пока выключено. Чтобы включить сбор в Google Forms:
-// 1) Создай Google Form с полями: Ник, Тип, Сообщение, Уровень, Очки, Дата, User Agent.
-// 2) Открой форму с предзаполненными ответами и возьми entry.xxxxxx для каждого поля.
-// 3) Поставь enabled: true и замени formResponseUrl / entry IDs ниже.
+// Подключено к живой форме обратной связи.
 window.RZ_FEEDBACK_GOOGLE_FORM = {
-  enabled: false,
-  formResponseUrl: 'https://docs.google.com/forms/d/e/FORM_ID/formResponse',
+  enabled: true,
+  formResponseUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSehaJKZZsDRTAk1yrEZrmR9w6SRE2jzpDr8HGGm2P2dpBAixQ/formResponse',
   fields: {
-    name: 'entry.NAME_ID',
-    type: 'entry.TYPE_ID',
-    text: 'entry.TEXT_ID',
-    level: 'entry.LEVEL_ID',
-    score: 'entry.SCORE_ID',
-    date: 'entry.DATE_ID',
-    userAgent: 'entry.USER_AGENT_ID'
+    name: 'entry.75077808',
+    text: 'entry.1161957304',
+    level: 'entry.133522223',
+    score: 'entry.1399821513',
+    date: 'entry.1923196721',
+    userAgent: 'entry.562560115',
+    source: 'entry.303978586'
   }
 };
