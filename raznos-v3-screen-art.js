@@ -1,3 +1,1 @@
-(()=>{
-const RZ_SCREEN_ART={"menu":"PLACEHOLDER"};
-})();
+PLACEHOLDER_TOO_LARGE_WILL_REPLACE
