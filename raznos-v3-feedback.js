@@ -2,12 +2,13 @@
 const DAY=24*60*60*1000;
 const STORE='raznos_v3_feedback';
 const LAST='raznos_v3_feedback_last';
+function cfg(){return window.RZ_FEEDBACK_GOOGLE_FORM||{enabled:false}}
 function style(){
   if(document.getElementById('rz-v3-feedback-style'))return;
   const s=document.createElement('style');
   s.id='rz-v3-feedback-style';
   s.textContent=`
-.rz-feedback-btn{width:100%;min-height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.065);font-weight:950;color:#fff}.rz-feedback-form{display:grid;gap:10px;margin-top:12px}.rz-feedback-form textarea,.rz-feedback-form input,.rz-feedback-form select{width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#fff;padding:11px 12px;font:inherit;outline:none}.rz-feedback-form textarea{min-height:118px;resize:vertical}.rz-feedback-form textarea::placeholder,.rz-feedback-form input::placeholder{color:rgba(255,255,255,.45)}.rz-feedback-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rz-feedback-muted{font-size:12px;line-height:1.35;color:#b8afca}.rz-feedback-item{padding:10px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);font-size:12px;line-height:1.35;color:#cfc7dc}.rz-feedback-item strong{display:block;color:#fff;font-size:13px;margin-bottom:4px}.rz-feedback-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rz-feedback-copy{font-size:11px;color:#f2cf77;margin-top:4px}
+.rz-feedback-btn{width:100%;min-height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.065);font-weight:950;color:#fff}.rz-feedback-form{display:grid;gap:10px;margin-top:12px}.rz-feedback-form textarea,.rz-feedback-form input,.rz-feedback-form select{width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#fff;padding:11px 12px;font:inherit;outline:none}.rz-feedback-form textarea{min-height:118px;resize:vertical}.rz-feedback-form textarea::placeholder,.rz-feedback-form input::placeholder{color:rgba(255,255,255,.45)}.rz-feedback-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rz-feedback-muted{font-size:12px;line-height:1.35;color:#b8afca}.rz-feedback-item{padding:10px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);font-size:12px;line-height:1.35;color:#cfc7dc}.rz-feedback-item strong{display:block;color:#fff;font-size:13px;margin-bottom:4px}.rz-feedback-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rz-feedback-copy{font-size:11px;color:#f2cf77;margin-top:4px}.rz-feedback-status{font-size:12px;line-height:1.35;color:#42d392}.rz-feedback-status.bad{color:#ffb84d}
 `;
   document.head.appendChild(s);
 }
@@ -16,6 +17,7 @@ function setItems(a){localStorage.setItem(STORE,JSON.stringify(a.slice(-100)))}
 function fmt(d){try{return new Date(d).toLocaleString('ru-RU')}catch(e){return String(d)}}
 function left(){const last=Number(localStorage.getItem(LAST)||0);return Math.max(0,DAY-(Date.now()-last))}
 function leftText(){const ms=left();if(!ms)return '';const h=Math.ceil(ms/3600000);return `Следующее сообщение можно отправить примерно через ${h} ч.`}
+function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function overlay(id,title,body){
   style();
   let ov=document.getElementById(id);
@@ -25,34 +27,52 @@ function overlay(id,title,body){
   return ov;
 }
 function close(id){document.getElementById(id)?.classList.remove('active')}
+async function submitGoogleForm(item){
+ const c=cfg();
+ if(!c.enabled||!c.formResponseUrl||!c.fields)return {ok:false,skipped:true,reason:'Google Form не настроена'};
+ const f=c.fields;
+ const data=new URLSearchParams();
+ const add=(key,val)=>{if(f[key]&&String(f[key]).startsWith('entry.'))data.append(f[key],String(val??''))};
+ add('name',item.name);add('type',item.type);add('text',item.text);add('level',item.level||'');add('score',item.score||0);add('date',fmt(item.date));add('userAgent',navigator.userAgent||'');
+ try{
+   await fetch(c.formResponseUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:data.toString()});
+   return {ok:true};
+ }catch(e){return {ok:false,reason:e.message||String(e)}}
+}
 function showForm(){
  const wait=leftText();
  const disabled=!!wait;
- const body=`<div class="hero-sub">Оставь коротко, что смешно/непонятно/сломалось. Ограничение: 1 сообщение в сутки с устройства.</div><div class="rz-feedback-form"><div class="rz-feedback-row"><input id="rzFbName" placeholder="Имя / ник" maxlength="40"><select id="rzFbType"><option>Баг</option><option>Юмор</option><option>Баланс</option><option>Идея</option><option>Другое</option></select></div><textarea id="rzFbText" placeholder="Напиши отзыв…" maxlength="1000" ${disabled?'disabled':''}></textarea><div class="rz-feedback-muted" id="rzFbLimit">${wait||'Сегодня сообщение ещё доступно.'}</div><div class="rz-feedback-actions"><button class="secondary-btn" id="rzFbClose">Закрыть</button><button class="primary-btn" id="rzFbSend" ${disabled?'disabled style="opacity:.45"':''}>Отправить</button></div></div>`;
+ const online=cfg().enabled;
+ const body=`<div class="hero-sub">Оставь коротко, что смешно/непонятно/сломалось. Ограничение: 1 сообщение в сутки с устройства.</div><div class="rz-feedback-form"><div class="rz-feedback-status ${online?'':'bad'}">${online?'Отзывы отправляются в Google Forms и дублируются локально.':'Google Forms пока не подключена: отзыв сохранится локально, можно будет скопировать.'}</div><div class="rz-feedback-row"><input id="rzFbName" placeholder="Имя / ник" maxlength="40"><select id="rzFbType"><option>Баг</option><option>Юмор</option><option>Баланс</option><option>Идея</option><option>Другое</option></select></div><textarea id="rzFbText" placeholder="Напиши отзыв…" maxlength="1000" ${disabled?'disabled':''}></textarea><div class="rz-feedback-muted" id="rzFbLimit">${wait||'Сегодня сообщение ещё доступно.'}</div><div class="rz-feedback-actions"><button class="secondary-btn" id="rzFbClose">Закрыть</button><button class="primary-btn" id="rzFbSend" ${disabled?'disabled style="opacity:.45"':''}>Отправить</button></div></div>`;
  const ov=overlay('rzFeedbackOverlay','Обратная связь',body);
  ov.querySelector('#rzFbClose').onclick=()=>close('rzFeedbackOverlay');
- ov.querySelector('#rzFbSend').onclick=()=>{
+ ov.querySelector('#rzFbSend').onclick=async()=>{
    if(left()){ov.querySelector('#rzFbLimit').textContent=leftText();return}
    const text=ov.querySelector('#rzFbText').value.trim();
    const name=ov.querySelector('#rzFbName').value.trim()||'Игрок';
    const type=ov.querySelector('#rzFbType').value;
    if(text.length<3){ov.querySelector('#rzFbLimit').textContent='Напиши хотя бы пару слов — иначе Батенин не поймёт, что согласовывать.';return}
+   ov.querySelector('#rzFbSend').disabled=true;
+   ov.querySelector('#rzFbLimit').textContent='Отправляю…';
    const item={date:Date.now(),name,type,text,level:(typeof level==='function'?level().id:null),score:(window.st&&st.score)||0};
-   const arr=getItems();arr.push(item);setItems(arr);localStorage.setItem(LAST,String(Date.now()));
-   showThanks(item);
+   const arr=getItems();arr.push(item);setItems(arr);
+   const sent=await submitGoogleForm(item);
+   localStorage.setItem(LAST,String(Date.now()));
+   showThanks(item,sent);
  };
 }
-function showThanks(item){
+function showThanks(item,sent){
  const payload=`[${item.type}] ${item.name}\nУровень: ${item.level||'-'}\nОчки: ${item.score||0}\nДата: ${fmt(item.date)}\n\n${item.text}`;
- const body=`<div class="hero-sub">Сохранил отзыв на этом устройстве. Для централизованного сбора можно скопировать текст и прислать тебе в Telegram/чат.</div><div class="rz-feedback-form"><textarea id="rzFbCopy" readonly>${payload.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</textarea><div class="rz-feedback-actions"><button class="secondary-btn" id="rzFbBack">Закрыть</button><button class="primary-btn" id="rzFbCopyBtn">Скопировать</button></div><div class="rz-feedback-copy" id="rzFbCopyMsg"></div></div>`;
+ const status=sent?.ok?'Отзыв отправлен в Google Forms и сохранён локально.':(sent?.skipped?'Отзыв сохранён локально. Google Forms пока не настроена.':'Отзыв сохранён локально, но отправка в Google Forms могла не пройти.');
+ const body=`<div class="hero-sub">${status}</div><div class="rz-feedback-form"><textarea id="rzFbCopy" readonly>${esc(payload)}</textarea><div class="rz-feedback-actions"><button class="secondary-btn" id="rzFbBack">Закрыть</button><button class="primary-btn" id="rzFbCopyBtn">Скопировать</button></div><div class="rz-feedback-copy" id="rzFbCopyMsg"></div></div>`;
  const ov=overlay('rzFeedbackOverlay','Отзыв принят',body);
  ov.querySelector('#rzFbBack').onclick=()=>close('rzFeedbackOverlay');
  ov.querySelector('#rzFbCopyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(payload);ov.querySelector('#rzFbCopyMsg').textContent='Скопировано.'}catch(e){ov.querySelector('#rzFbCopyMsg').textContent='Не удалось скопировать автоматически — выдели текст вручную.'}};
 }
 function showList(){
  const arr=getItems().slice().reverse();
- const list=arr.length?arr.map((x,i)=>`<div class="rz-feedback-item"><strong>${i+1}. ${x.type} · ${x.name} · ${fmt(x.date)}</strong>${String(x.text).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}<div class="rz-feedback-muted">Уровень: ${x.level||'-'} · Очки: ${x.score||0}</div></div>`).join(''):'<div class="rz-feedback-item"><strong>Пока пусто</strong>Отзывы ещё не оставляли. Даже Батенин молчит.</div>';
- const body=`<div class="hero-sub">Отзывы сохраняются локально на этом устройстве. Для общего сбора потом лучше подключить Telegram/Google Form/сервер.</div><div class="mini-list">${list}</div><div class="overlay-actions"><button class="secondary-btn" id="rzFbClear">Очистить</button><button class="primary-btn" id="rzFbListClose">Назад</button></div>`;
+ const list=arr.length?arr.map((x,i)=>`<div class="rz-feedback-item"><strong>${i+1}. ${esc(x.type)} · ${esc(x.name)} · ${fmt(x.date)}</strong>${esc(x.text)}<div class="rz-feedback-muted">Уровень: ${x.level||'-'} · Очки: ${x.score||0}</div></div>`).join(''):'<div class="rz-feedback-item"><strong>Пока пусто</strong>Отзывы ещё не оставляли. Даже Батенин молчит.</div>';
+ const body=`<div class="hero-sub">${cfg().enabled?'Основной сбор идёт в Google Forms. Здесь — локальная копия на этом устройстве.':'Отзывы сохраняются локально на этом устройстве. Подключи Google Forms, чтобы видеть отзывы всех игроков.'}</div><div class="mini-list">${list}</div><div class="overlay-actions"><button class="secondary-btn" id="rzFbClear">Очистить</button><button class="primary-btn" id="rzFbListClose">Назад</button></div>`;
  const ov=overlay('rzFeedbackListOverlay','Отзывы игроков',body);
  ov.querySelector('#rzFbListClose').onclick=()=>close('rzFeedbackListOverlay');
  ov.querySelector('#rzFbClear').onclick=()=>{localStorage.removeItem(STORE);showList()};
