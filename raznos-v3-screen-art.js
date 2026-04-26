@@ -2,8 +2,8 @@
 if(window.__rzV3ScreenArtLoaded)return;window.__rzV3ScreenArtLoaded=true;
 
 // Только экранные фоны. Поле, фишки, умения, анимации и механику не трогаем.
-// Чтобы арты появились, положи изображения в /rz-screen-art/ с именами ниже.
-const VER='20260427-screen-art-01';
+// Арты лежат в /rz-screen-art/ с именами из ART ниже.
+const VER='20260427-screen-art-02';
 const BASE='./rz-screen-art/';
 const ART={
   menu:'menu.jpg',
