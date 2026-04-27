@@ -42,7 +42,7 @@
       const payload = {
         nick,
         score: Number(st.score || 0),
-        level: 'FINAL',
+        level: 60,
         levelName: 'Финал игры',
         win: true,
         heat: Number(st.heat || 0),
@@ -51,7 +51,7 @@
         sessionId: localStorage.getItem('raznos_v3_session_id') || '',
         userAgent: navigator.userAgent || ''
       };
-      await fetch(GLOBAL_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), mode: 'cors' });
+      await fetch(GLOBAL_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), mode: 'cors' });
     } catch (e) { console.warn('final score submit failed', e); }
   }
   function showFinalResult() {
