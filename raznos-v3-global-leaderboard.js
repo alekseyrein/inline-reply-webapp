@@ -12,7 +12,7 @@ async function submitScoreToGlobal(source='game'){
       nick:getNick(),score:Number(st.score||0),level:Number(lv.id||((st.level||0)+1)||1),levelName:String(lv.name||''),win:true,
       heat:Number(st.heat||0),movesLeft:Number(st.moves||0),source,sessionId:getSessionId(),userAgent:navigator.userAgent||''
     };
-    await fetch(LEADERBOARD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),mode:'cors'});
+    await fetch(LEADERBOARD_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),mode:'cors'});
   }catch(e){console.warn('Global leaderboard submit failed',e)}
 }
 async function fetchGlobalLeaderboard(limit=10){
