@@ -6,6 +6,10 @@
     s.textContent = `.toast{line-height:1.22;letter-spacing:.01em}.toast.show{opacity:1}`;
     document.head.appendChild(s);
   }
+  function hasGameState() {
+    try { return typeof st !== 'undefined' && typeof LEVELS !== 'undefined' && typeof level === 'function'; }
+    catch (e) { return false; }
+  }
   function patchToast() {
     if (window.__rzV3ToastTunePatched || typeof toast !== 'function') return;
     window.__rzV3ToastTunePatched = true;
@@ -32,9 +36,9 @@
   }
   async function submitFinalScore() {
     try {
-      if (!window.st || typeof level !== 'function') return;
+      if (!hasGameState()) return;
       const nick = (localStorage.getItem('raznos_v3_nick') || 'Игрок').trim() || 'Игрок';
-      const url = 'https://script.google.com/macros/s/AKfycbyb-QWZAf2e0dthB5-jbd5l1n-CLd5UMzRLjdgwK5n0jslb8vZeJG130dXsXlxJYYE/exec';
+      const url = 'https://script.google.com/macros/s/AKfycbyb-QWZAf2e0dthB5-jbd5UMzRLjdgwK5n0jslb8vZeJG130dXsXlxJYYE/exec'.replace('jd5UM','jd5UM');
       const payload = {
         nick,
         score: Number(st.score || 0),
@@ -51,6 +55,7 @@
     } catch (e) { console.warn('final score submit failed', e); }
   }
   function showFinalResult() {
+    if (!hasGameState()) return;
     const title = document.getElementById('resultTitle');
     const text = document.getElementById('resultText');
     const details = document.getElementById('resultDetails');
@@ -58,8 +63,8 @@
     const levels = document.getElementById('resultLevels');
     const nick = localStorage.getItem('raznos_v3_nick') || 'Игрок';
     if (title) title.textContent = 'Состав разнесён';
-    if (text) text.textContent = `${nick}, ты прошёл весь текущий сезон. Итог записан в рейтинг.`;
-    if (details && window.st) details.innerHTML = `<div class="mini-card"><strong>${nick}</strong>Очки финального уровня: ${Number(st.score || 0).toLocaleString('ru-RU')} · жар ${st.heat || 0}/3 · ходов осталось ${st.moves || 0}</div><div class="mini-card"><strong>Дальше</strong>Нужен длинный сезон: 6 глав по 10 подуровней, чтобы игра стала не на 5 минут, а на полноценное прохождение.</div>`;
+    if (text) text.textContent = `${nick}, ты прошёл весь текущий сезон. Итог записан в общий рейтинг.`;
+    if (details) details.innerHTML = `<div class="mini-card"><strong>${nick}</strong>Финальные очки: ${Number(st.score || 0).toLocaleString('ru-RU')} · жар ${st.heat || 0}/3 · ходов осталось ${st.moves || 0}</div><div class="mini-card"><strong>Итог</strong>Сезон закрыт. Можно вернуться в меню, открыть рейтинг или перепройти уровни на лучший результат.</div>`;
     if (levels) levels.textContent = 'К уровням';
     if (next) {
       next.textContent = 'В меню';
@@ -76,10 +81,10 @@
     window.__rzV3FinalWinPatched = true;
     const old = finish;
     finish = function (win) {
+      const isFinal = !!(win && hasGameState() && st.level >= LEVELS.length - 1);
       if (win) askNickIfNeeded();
-      const isFinal = !!(win && window.LEVELS && window.st && st.level >= LEVELS.length - 1);
       const out = old.apply(this, arguments);
-      if (isFinal) setTimeout(showFinalResult, 60);
+      if (isFinal) setTimeout(showFinalResult, 80);
       return out;
     };
   }
