@@ -1,4 +1,5 @@
 (()=> {
+  const GLOBAL_URL = 'https://script.google.com/macros/s/AKfycbyb-QWZAf2e0dthB5-jbd5l1n-CLd5UMzRLjdgwK5n0jslb8vZeJG130dXsXlxJYYE/exec';
   function addStyle() {
     if (document.getElementById('rz-v3-toast-tuning-style')) return;
     const s = document.createElement('style');
@@ -38,7 +39,6 @@
     try {
       if (!hasGameState()) return;
       const nick = (localStorage.getItem('raznos_v3_nick') || 'Игрок').trim() || 'Игрок';
-      const url = 'https://script.google.com/macros/s/AKfycbyb-QWZAf2e0dthB5-jbd5UMzRLjdgwK5n0jslb8vZeJG130dXsXlxJYYE/exec'.replace('jd5UM','jd5UM');
       const payload = {
         nick,
         score: Number(st.score || 0),
@@ -51,7 +51,7 @@
         sessionId: localStorage.getItem('raznos_v3_session_id') || '',
         userAgent: navigator.userAgent || ''
       };
-      await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), mode: 'cors' });
+      await fetch(GLOBAL_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), mode: 'cors' });
     } catch (e) { console.warn('final score submit failed', e); }
   }
   function showFinalResult() {
